@@ -28,11 +28,21 @@ export class EventsController {
   }
 
   @Get()
-  findAll(@Query('status') status?: EventStatus) {
+  findAll(
+    @Query('status') status?: EventStatus,
+    @Query('all') all?: string,
+  ) {
     if (status) {
       return this.eventsService.findAll(status);
     }
     return this.eventsService.findPublished();
+  }
+
+  @Get('admin/all')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  findAllAdmin() {
+    return this.eventsService.findAll();
   }
 
   @Get(':id')
@@ -45,5 +55,19 @@ export class EventsController {
   @Roles('ADMIN')
   update(@Param('id') id: string, @Body() updateEventDto: UpdateEventDto) {
     return this.eventsService.update(id, updateEventDto);
+  }
+
+  @Patch(':id/publish')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  publish(@Param('id') id: string) {
+    return this.eventsService.publish(id);
+  }
+
+  @Patch(':id/cancel')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  cancel(@Param('id') id: string) {
+    return this.eventsService.cancel(id);
   }
 }
