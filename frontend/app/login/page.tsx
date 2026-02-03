@@ -60,10 +60,12 @@ export default function LoginPage() {
       setIsLoading(true);
       setError(null);
       await login(data.email, data.password);
-      router.push('/');
+      setTimeout(() => {
+        router.push('/');
+        router.refresh();
+      }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
-    } finally {
       setIsLoading(false);
     }
   };
