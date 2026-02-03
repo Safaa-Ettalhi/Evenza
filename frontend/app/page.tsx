@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Event, API_URL } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { EventCard } from '@/components/EventCard';
+import { Header } from '@/components/Header';
 import { Calendar, Users, ArrowRight, TrendingUp, Ticket } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -37,24 +38,7 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-gray-200 bg-white dark:bg-[#0a0a0a]">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-white">
-              Evenza
-            </Link>
-            <nav className="flex items-center gap-4">
-              <Button variant="ghost" className="hidden sm:flex text-gray-700 dark:text-gray-300" asChild>
-                <Link href="/login">Connexion</Link>
-              </Button>
-              <Button className="bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100" asChild>
-                <Link href="/register">Inscription</Link>
-              </Button>
-            </nav>
-          </div>
-        </div>
-      </header>
+      <Header />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-white dark:bg-[#0a0a0a]">
