@@ -52,4 +52,24 @@ export class EventsService {
     }
     return event;
   }
+
+  async publish(id: string): Promise<EventDocument> {
+    const event = await this.eventModel
+      .findByIdAndUpdate(id, { status: EventStatus.PUBLISHED }, { new: true })
+      .exec();
+    if (!event) {
+      throw new CustomNotFoundException('Événement non trouvé');
+    }
+    return event;
+  }
+
+  async cancel(id: string): Promise<EventDocument> {
+    const event = await this.eventModel
+      .findByIdAndUpdate(id, { status: EventStatus.CANCELED }, { new: true })
+      .exec();
+    if (!event) {
+      throw new CustomNotFoundException('Événement non trouvé');
+    }
+    return event;
+  }
 }
