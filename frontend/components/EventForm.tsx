@@ -13,7 +13,7 @@ const eventSchema = z.object({
   description: z.string().min(1, 'La description est requise'),
   date: z.string().min(1, 'La date est requise'),
   location: z.string().min(1, 'Le lieu est requis'),
-  capacity: z.coerce.number().min(1, 'La capacité doit être au moins 1'),
+  capacity: z.number().min(1, 'La capacité doit être au moins 1'),
 });
 
 type EventFormValues = z.infer<typeof eventSchema>;
@@ -92,7 +92,7 @@ export function EventForm({ defaultValues, onSubmit, submitLabel }: EventFormPro
           id="capacity"
           type="number"
           min={1}
-          {...register('capacity')}
+          {...register('capacity', { valueAsNumber: true })}
           className={errors.capacity ? 'border-red-500' : ''}
         />
         {errors.capacity && <p className="text-sm text-red-600 dark:text-red-400">{errors.capacity.message}</p>}
