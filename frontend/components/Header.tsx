@@ -28,9 +28,14 @@ export function Header() {
                   )}
                 </div>
                 {user.role === 'ADMIN' && (
-                  <Button variant="ghost" className="hidden sm:flex" asChild>
-                    <Link href="/admin/dashboard">Dashboard</Link>
-                  </Button>
+                  <>
+                    <Button variant="ghost" className="hidden sm:flex" asChild>
+                      <Link href="/admin/events">Événements</Link>
+                    </Button>
+                    <Button variant="ghost" className="hidden sm:flex" asChild>
+                      <Link href="/admin/dashboard">Dashboard</Link>
+                    </Button>
+                  </>
                 )}
                 <Button variant="ghost" className="hidden sm:flex" asChild>
                   <Link href="/mes-reservations">Mes réservations</Link>

@@ -4,6 +4,8 @@ export interface User {
   role: string;
 }
 
+export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELED';
+
 export interface Event {
   _id: string;
   title: string;
@@ -11,7 +13,17 @@ export interface Event {
   date: string;
   location: string;
   capacity: number;
+  status?: EventStatus;
   availableSpots?: number;
+}
+
+export interface CreateEventData {
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  capacity: number;
+  status?: EventStatus;
 }
 
 interface LoginRequest {
@@ -79,6 +91,54 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(data),
     });
+  }
+
+  private requestWithAuth<T>(endpoint: string, options: RequestInit, token: string): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      headers: {
+        ...options.headers,
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  }
+
+  async getEvents(token?: string, status?: string): Promise<Event[]> {
+    const url = status ? `/events?status=${status}` : '/events';
+    if (token) {
+      return this.requestWithAuth<Event[]>(url, { method: 'GET' }, token);
+    }
+    return this.request<Event[]>(url, { method: 'GET' });
+  }
+
+  async getEventsAdmin(token: string): Promise<Event[]> {
+    return this.requestWithAuth<Event[]>('/events/admin/all', { method: 'GET' }, token);
+  }
+
+  async getEvent(id: string): Promise<Event> {
+    return this.request<Event>(`/events/${id}`, { method: 'GET' });
+  }
+
+  async createEvent(data: CreateEventData, token: string): Promise<Event> {
+    return this.requestWithAuth<Event>('/events', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, token);
+  }
+
+  async updateEvent(id: string, data: Partial<CreateEventData>, token: string): Promise<Event> {
+    return this.requestWithAuth<Event>(`/events/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }, token);
+  }
+
+  async publishEvent(id: string, token: string): Promise<Event> {
+    return this.requestWithAuth<Event>(`/events/${id}/publish`, { method: 'PATCH' }, token);
+  }
+
+  async cancelEvent(id: string, token: string): Promise<Event> {
+    return this.requestWithAuth<Event>(`/events/${id}/cancel`, { method: 'PATCH' }, token);
   }
 }
 
