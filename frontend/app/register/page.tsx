@@ -47,7 +47,10 @@ export default function RegisterPage() {
   });
 
   React.useEffect(() => {
-    if (!authLoading && isAuthenticated) router.push('/');
+    if (!authLoading && isAuthenticated) {
+      router.push('/');
+      router.refresh();
+    }
   }, [isAuthenticated, authLoading, router]);
 
   if (authLoading) {
@@ -73,6 +76,7 @@ export default function RegisterPage() {
       }, 100);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } finally {
       setIsLoading(false);
     }
   };

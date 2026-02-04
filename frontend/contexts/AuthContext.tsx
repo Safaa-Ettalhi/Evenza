@@ -15,8 +15,8 @@ function parseTokenToUser(token: string): User | null {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (email: string, password: string) => Promise<User>;
   logout: () => void;
   isLoading: boolean;
   isAuthenticated: boolean;
@@ -49,16 +49,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string): Promise<User> => {
     const { access_token } = await apiService.login({ email, password });
     if (typeof window !== 'undefined') localStorage.setItem('token', access_token);
     setToken(access_token);
-    setUser(parseTokenToUser(access_token) ?? null);
+    const u = parseTokenToUser(access_token) ?? null;
+    setUser(u);
+    if (!u) throw new Error('Erreur lors de la connexion');
+    return u;
   }, []);
 
-  const register = useCallback(async (email: string, password: string) => {
+  const register = useCallback(async (email: string, password: string): Promise<User> => {
     await apiService.register({ email, password });
-    await login(email, password);
+    return login(email, password);
   }, [login]);
 
   const logout = useCallback(() => {
