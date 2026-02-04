@@ -20,7 +20,7 @@ export interface Event {
 
 export interface Reservation {
   _id: string;
-  eventId: string;
+  eventId: string | Event;
   userId: string;
   status: ReservationStatus;
   createdAt?: string;
@@ -160,6 +160,14 @@ class ApiService {
       method: 'POST',
       body: JSON.stringify(data),
     }, token);
+  }
+
+  async getMyReservations(token: string): Promise<Reservation[]> {
+    return this.requestWithAuth<Reservation[]>('/reservations/me', { method: 'GET' }, token);
+  }
+
+  async cancelReservation(id: string, token: string): Promise<Reservation> {
+    return this.requestWithAuth<Reservation>(`/reservations/${id}/cancel`, { method: 'PATCH' }, token);
   }
 }
 
