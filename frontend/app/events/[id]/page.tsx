@@ -57,7 +57,6 @@ export default function EventDetailPage() {
       
       setSuccess('Votre réservation a été créée avec succès ! Elle est en attente de confirmation.');
       
-      // Rafraîchir les données de l'événement pour mettre à jour les places disponibles
       const updatedEvent = await apiService.getEvent(eventId);
       setEvent(updatedEvent);
     } catch (err: any) {
