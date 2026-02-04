@@ -5,6 +5,7 @@ export interface User {
 }
 
 export type EventStatus = 'DRAFT' | 'PUBLISHED' | 'CANCELED';
+export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'REFUSED' | 'CANCELED';
 
 export interface Event {
   _id: string;
@@ -15,6 +16,19 @@ export interface Event {
   capacity: number;
   status?: EventStatus;
   availableSpots?: number;
+}
+
+export interface Reservation {
+  _id: string;
+  eventId: string;
+  userId: string;
+  status: ReservationStatus;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateReservationData {
+  eventId: string;
 }
 
 export interface CreateEventData {
@@ -45,7 +59,7 @@ interface RegisterResponse {
   userId: string;
 }
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
 
 class ApiService {
   private async request<T>(
@@ -139,6 +153,13 @@ class ApiService {
 
   async cancelEvent(id: string, token: string): Promise<Event> {
     return this.requestWithAuth<Event>(`/events/${id}/cancel`, { method: 'PATCH' }, token);
+  }
+
+  async createReservation(data: CreateReservationData, token: string): Promise<Reservation> {
+    return this.requestWithAuth<Reservation>('/reservations', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, token);
   }
 }
 
