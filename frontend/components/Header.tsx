@@ -27,7 +27,7 @@ export function Header() {
                     </span>
                   )}
                 </div>
-                {user.role === 'ADMIN' && (
+                {user.role === 'ADMIN' ? (
                   <>
                     <Button variant="ghost" className="hidden sm:flex" asChild>
                       <Link href="/admin/events">Événements</Link>
@@ -36,10 +36,16 @@ export function Header() {
                       <Link href="/admin/dashboard">Dashboard</Link>
                     </Button>
                   </>
+                ) : (
+                  <>
+                    <Button variant="ghost" className="hidden sm:flex" asChild>
+                      <Link href="/catalogue">Catalogue</Link>
+                    </Button>
+                    <Button variant="ghost" className="hidden sm:flex" asChild>
+                      <Link href="/mes-reservations">Mes réservations</Link>
+                    </Button>
+                  </>
                 )}
-                <Button variant="ghost" className="hidden sm:flex" asChild>
-                  <Link href="/mes-reservations">Mes réservations</Link>
-                </Button>
                 <Button variant="ghost" onClick={logout} className="flex items-center gap-2">
                   <LogOut className="h-4 w-4" />
                   Déconnexion
