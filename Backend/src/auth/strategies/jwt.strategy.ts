@@ -24,8 +24,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException('Utilisateur non trouvé');
     }
+    // Retourner sub pour correspondre au payload JWT et aux contrôleurs qui utilisent req.user.sub
     return {
-      userId: user._id,
+      sub: user._id.toString(),
+      userId: user._id.toString(),
       email: user.email,
       role: user.role,
     };
