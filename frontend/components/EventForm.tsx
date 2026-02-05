@@ -49,7 +49,7 @@ export function EventForm({ defaultValues, onSubmit, submitLabel, isSubmitting: 
         description: data.description,
         date: data.date,
         location: data.location,
-        capacity: data.capacity,
+        capacity: typeof data.capacity === 'number' ? data.capacity : Number(data.capacity) || 1,
       });
     } catch (err) {
       setError('root', { message: err instanceof Error ? err.message : 'Une erreur est survenue' });
