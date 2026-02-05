@@ -40,6 +40,26 @@ export interface CreateEventData {
   status?: EventStatus;
 }
 
+export interface AdminStats {
+  upcomingEvents: number;
+  totalEvents: number;
+  publishedEvents: number;
+  draftEvents: number;
+  canceledEvents: number;
+  totalReservations: number;
+  confirmedReservations: number;
+  pendingReservations: number;
+  refusedReservations: number;
+  canceledReservations: number;
+  averageFillRate: number;
+  reservationsByStatus: {
+    CONFIRMED: number;
+    PENDING: number;
+    REFUSED: number;
+    CANCELED: number;
+  };
+}
+
 interface LoginRequest {
   email: string;
   password: string;
@@ -213,6 +233,10 @@ class ApiService {
     }
 
     return response.blob();
+  }
+
+  async getAdminStats(token: string): Promise<AdminStats> {
+    return this.requestWithAuth<AdminStats>('/admin/stats', { method: 'GET' }, token);
   }
 }
 
