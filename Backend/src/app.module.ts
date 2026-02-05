@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { EventsModule } from './events/events.module';
 import { ReservationsModule } from './reservations/reservations.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { ReservationsModule } from './reservations/reservations.module';
     AuthModule,
     EventsModule,
     ReservationsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],
