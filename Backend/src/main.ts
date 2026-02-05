@@ -6,7 +6,8 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+  // Configuration CORS pour permettre les requêtes depuis le frontend
+  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
   app.enableCors({
     origin: [
       frontendUrl,
@@ -26,6 +27,10 @@ async function bootstrap() {
     forbidNonWhitelisted: true,
   }));
   app.useGlobalFilters(new HttpExceptionFilter());
-  await app.listen(process.env.PORT ?? 3000);
+  
+  const port = process.env.PORT || 3000;
+  await app.listen(port);
+  console.log(`🚀 Backend démarré sur http://localhost:${port}`);
+  console.log(`🌐 CORS activé pour: ${frontendUrl}`);
 }
 bootstrap();
