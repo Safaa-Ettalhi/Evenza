@@ -20,9 +20,17 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload) {
+    if (!payload) {
+      throw new UnauthorizedException('Token invalide : payload manquant');
+    }
+    
+    if (!payload.email) {
+      throw new UnauthorizedException('Token invalide : email manquant dans le payload');
+    }
+    
     const user = await this.usersService.findByEmail(payload.email);
     if (!user) {
-      throw new UnauthorizedException('Utilisateur non trouvé');
+      throw new UnauthorizedException(`Utilisateur non trouvé pour l'email: ${payload.email}`);
     }
    
     return {
