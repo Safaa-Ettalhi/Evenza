@@ -13,18 +13,28 @@ async function ensureTestUsers(usersService: UsersService): Promise<void> {
 
   let admin = await usersService.findByEmail(adminEmail);
   if (!admin) {
-    const hashedAdmin = await bcrypt.hash('admin123', 10);
-    admin = await usersService.create(adminEmail, hashedAdmin, 'ADMIN');
+    try {
+      const hashedAdmin = await bcrypt.hash('admin123', 10);
+      admin = await usersService.create(adminEmail, hashedAdmin, 'ADMIN');
+    } catch (err: unknown) {
+      if ((err as { code?: number })?.code !== 11000) throw err;
+      admin = await usersService.findByEmail(adminEmail);
+    }
   }
 
   let participant = await usersService.findByEmail(participantEmail);
   if (!participant) {
-    const hashedParticipant = await bcrypt.hash('participant123', 10);
-    participant = await usersService.create(
-      participantEmail,
-      hashedParticipant,
-      'PARTICIPANT',
-    );
+    try {
+      const hashedParticipant = await bcrypt.hash('participant123', 10);
+      participant = await usersService.create(
+        participantEmail,
+        hashedParticipant,
+        'PARTICIPANT',
+      );
+    } catch (err: unknown) {
+      if ((err as { code?: number })?.code !== 11000) throw err;
+      participant = await usersService.findByEmail(participantEmail);
+    }
   }
 }
 
