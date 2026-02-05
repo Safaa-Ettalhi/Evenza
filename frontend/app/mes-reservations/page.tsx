@@ -43,6 +43,14 @@ export default function MesReservationsPage() {
         setIsLoadingReservations(false);
         return;
       }
+      if (!token.trim()) {
+        setError('Token d\'authentification invalide. Veuillez vous reconnecter.');
+        setIsLoadingReservations(false);
+        setTimeout(() => {
+          router.push('/login');
+        }, 2000);
+        return;
+      }
 
       try {
         setIsLoadingReservations(true);
@@ -52,7 +60,13 @@ export default function MesReservationsPage() {
       } catch (err: any) {
         const errorMessage = err.message || 'Impossible de charger vos réservations';
         setError(errorMessage);
-        if (errorMessage.toLowerCase().includes('unauthorized') || errorMessage.toLowerCase().includes('non autorisé')) {
+        
+        if (errorMessage.toLowerCase().includes('unauthorized') || 
+            errorMessage.toLowerCase().includes('non autorisé') ||
+            errorMessage.toLowerCase().includes('token')) {
+          if (typeof window !== 'undefined') {
+            localStorage.removeItem('token');
+          }
           setTimeout(() => {
             router.push('/login');
           }, 2000);
