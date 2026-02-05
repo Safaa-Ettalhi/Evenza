@@ -48,6 +48,27 @@ export class ReservationsController {
     return this.reservationsService.findOne(id);
   }
 
+  @Get('event/:eventId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  findByEventId(@Param('eventId') eventId: string) {
+    return this.reservationsService.findByEventId(eventId);
+  }
+
+  @Patch(':id/confirm')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  confirm(@Param('id') id: string) {
+    return this.reservationsService.confirm(id);
+  }
+
+  @Patch(':id/refuse')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  refuse(@Param('id') id: string) {
+    return this.reservationsService.refuse(id);
+  }
+
   @Patch(':id/cancel')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PARTICIPANT', 'ADMIN')
