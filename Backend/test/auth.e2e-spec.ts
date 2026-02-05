@@ -19,11 +19,13 @@ describe('AuthController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-    }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     app.useGlobalFilters(new HttpExceptionFilter());
     app.enableCors({
       origin: 'http://localhost:3001',
@@ -53,7 +55,7 @@ describe('AuthController (e2e)', () => {
       participantId = response.body.userId;
     });
 
-    it('devrait lancer une erreur si l\'email existe déjà', async () => {
+    it("devrait lancer une erreur si l'email existe déjà", async () => {
       const email = `test-duplicate-${Date.now()}@example.com`;
       const registerDto = {
         email,
@@ -71,7 +73,7 @@ describe('AuthController (e2e)', () => {
         .expect(409);
     });
 
-    it('devrait lancer une erreur si l\'email est invalide', async () => {
+    it("devrait lancer une erreur si l'email est invalide", async () => {
       const registerDto = {
         email: 'invalid-email',
         password: 'password123',
@@ -121,7 +123,7 @@ describe('AuthController (e2e)', () => {
       participantToken = response.body.access_token;
     });
 
-    it('devrait lancer une erreur si l\'email n\'existe pas', async () => {
+    it("devrait lancer une erreur si l'email n'existe pas", async () => {
       const loginDto = {
         email: 'nonexistent@example.com',
         password: 'password123',
@@ -153,7 +155,7 @@ describe('AuthController (e2e)', () => {
         .expect(401);
     });
 
-    it('devrait lancer une erreur si l\'email est invalide', async () => {
+    it("devrait lancer une erreur si l'email est invalide", async () => {
       const loginDto = {
         email: 'invalid-email',
         password: 'password123',
@@ -167,7 +169,7 @@ describe('AuthController (e2e)', () => {
   });
 
   describe('Scénario complet: Inscription → Login → Utilisation du token', () => {
-    it('devrait permettre l\'inscription, la connexion et l\'utilisation du token', async () => {
+    it("devrait permettre l'inscription, la connexion et l'utilisation du token", async () => {
       const email = `test-${Date.now()}@example.com`;
       const password = 'password123';
 

@@ -18,11 +18,13 @@ describe('ReservationsController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-    }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     app.useGlobalFilters(new HttpExceptionFilter());
     app.enableCors({
       origin: 'http://localhost:3001',
@@ -92,7 +94,7 @@ describe('ReservationsController (e2e)', () => {
         .expect(401);
     });
 
-    it('devrait refuser la réservation si l\'événement n\'est pas publié', async () => {
+    it("devrait refuser la réservation si l'événement n'est pas publié", async () => {
       const draftEventResponse = await request(app.getHttpServer())
         .post('/events')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -113,7 +115,7 @@ describe('ReservationsController (e2e)', () => {
         .expect(400);
     });
 
-    it('devrait refuser la réservation si l\'événement est complet', async () => {
+    it("devrait refuser la réservation si l'événement est complet", async () => {
       const smallEventResponse = await request(app.getHttpServer())
         .post('/events')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -172,7 +174,7 @@ describe('ReservationsController (e2e)', () => {
   });
 
   describe('GET /reservations/me (Participant)', () => {
-    it('devrait retourner les réservations de l\'utilisateur connecté', async () => {
+    it("devrait retourner les réservations de l'utilisateur connecté", async () => {
       const response = await request(app.getHttpServer())
         .get('/reservations/me')
         .set('Authorization', `Bearer ${participantToken}`)
@@ -181,10 +183,8 @@ describe('ReservationsController (e2e)', () => {
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('devrait refuser l\'accès si non authentifié', async () => {
-      await request(app.getHttpServer())
-        .get('/reservations/me')
-        .expect(401);
+    it("devrait refuser l'accès si non authentifié", async () => {
+      await request(app.getHttpServer()).get('/reservations/me').expect(401);
     });
   });
 
@@ -198,7 +198,7 @@ describe('ReservationsController (e2e)', () => {
       expect(Array.isArray(response.body)).toBe(true);
     });
 
-    it('devrait refuser l\'accès si non admin', async () => {
+    it("devrait refuser l'accès si non admin", async () => {
       await request(app.getHttpServer())
         .get('/reservations')
         .set('Authorization', `Bearer ${participantToken}`)
@@ -277,7 +277,7 @@ describe('ReservationsController (e2e)', () => {
   });
 
   describe('PATCH /reservations/:id/cancel', () => {
-    it('devrait permettre à un participant d\'annuler sa propre réservation', async () => {
+    it("devrait permettre à un participant d'annuler sa propre réservation", async () => {
       const cancelEventResponse = await request(app.getHttpServer())
         .post('/events')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -312,7 +312,7 @@ describe('ReservationsController (e2e)', () => {
       expect(response.body.status).toBe('CANCELED');
     });
 
-    it('devrait permettre à un admin d\'annuler n\'importe quelle réservation', async () => {
+    it("devrait permettre à un admin d'annuler n'importe quelle réservation", async () => {
       const adminCancelEventResponse = await request(app.getHttpServer())
         .post('/events')
         .set('Authorization', `Bearer ${adminToken}`)
@@ -390,7 +390,7 @@ describe('ReservationsController (e2e)', () => {
         .expect(200);
 
       const confirmedReservation = myReservationsResponse.body.find(
-        (r: any) => r._id === resId
+        (r: any) => r._id === resId,
       );
       expect(confirmedReservation).toBeDefined();
       expect(confirmedReservation.status).toBe('CONFIRMED');

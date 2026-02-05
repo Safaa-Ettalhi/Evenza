@@ -17,11 +17,13 @@ describe('EventsController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    app.useGlobalPipes(new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      forbidNonWhitelisted: true,
-    }));
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        forbidNonWhitelisted: true,
+      }),
+    );
     app.useGlobalFilters(new HttpExceptionFilter());
     app.enableCors({
       origin: 'http://localhost:3001',
@@ -45,7 +47,7 @@ describe('EventsController (e2e)', () => {
   });
 
   describe('POST /events (Admin seulement)', () => {
-    it('devrait créer un événement en tant qu\'admin', async () => {
+    it("devrait créer un événement en tant qu'admin", async () => {
       const createEventDto = {
         title: 'Test Event E2E',
         description: 'Description de test pour E2E',
@@ -155,7 +157,7 @@ describe('EventsController (e2e)', () => {
       expect(response.body).toHaveProperty('_id', createdEventId);
     });
 
-    it('devrait retourner 404 si l\'événement n\'existe pas', async () => {
+    it("devrait retourner 404 si l'événement n'existe pas", async () => {
       await request(app.getHttpServer())
         .get('/events/507f1f77bcf86cd799439011')
         .expect(404);
