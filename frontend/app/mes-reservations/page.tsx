@@ -5,7 +5,7 @@ import { Header } from '@/components/Header';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { apiService, Reservation, Event } from '@/lib/api';
-import { Ticket, Calendar, MapPin, X, AlertCircle, CheckCircle2, Clock, Ban } from 'lucide-react';
+import { Ticket, Calendar, MapPin, X, AlertCircle, CheckCircle2, Clock, Ban, Download, Eye, FileText } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -27,6 +27,7 @@ export default function MesReservationsPage() {
   const [success, setSuccess] = useState<string | null>(null);
   const [cancelingId, setCancelingId] = useState<string | null>(null);
   const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (isLoading) return;
@@ -80,6 +81,30 @@ export default function MesReservationsPage() {
       fetchReservations();
     }
   }, [isAuthenticated, token, router]);
+
+  const handleDownloadTicket = async (reservationId: string) => {
+    if (!token) return;
+
+    try {
+      setDownloadingId(reservationId);
+      setError(null);
+
+      const blob = await apiService.downloadTicket(reservationId, token);
+      
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `ticket-${reservationId}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err: any) {
+      setError(err.message || 'Erreur lors du téléchargement du ticket');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
 
   const handleCancel = async (reservationId: string) => {
     if (!token) return;
@@ -270,50 +295,145 @@ export default function MesReservationsPage() {
                         })}
                       </div>
                     )}
+
+                    {/* Messages selon le statut */}
+                    {reservation.status === 'CONFIRMED' && (
+                      <div className="mt-3 p-3 bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-800 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-green-800 dark:text-green-300">
+                              Réservation confirmée
+                            </p>
+                            <p className="text-xs text-green-700 dark:text-green-400 mt-1">
+                              Votre ticket est disponible. Téléchargez-le pour l'événement.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {reservation.status === 'PENDING' && (
+                      <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <Clock className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-yellow-800 dark:text-yellow-300">
+                              En attente de confirmation
+                            </p>
+                            <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
+                              Votre réservation est en cours de traitement par l'administrateur.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    {reservation.status === 'REFUSED' && (
+                      <div className="mt-3 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <Ban className="h-5 w-5 text-red-600 dark:text-red-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-red-800 dark:text-red-300">
+                              Réservation refusée
+                            </p>
+                            <p className="text-xs text-red-700 dark:text-red-400 mt-1">
+                              Votre réservation a été refusée. Contactez l'administrateur pour plus d'informations.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
 
-                  <CardFooter className="pt-4 flex gap-2">
-                    <Link href={`/events/${event._id}`} className="flex-1">
-                      <Button
-                        variant="outline"
-                        className="w-full"
-                      >
-                        Voir les détails
-                      </Button>
-                    </Link>
-                    {canCancel(reservation.status) && (
-                      <>
-                        {confirmCancelId === reservation._id ? (
-                          <div className="flex gap-2 flex-1">
-                            <Button
-                              variant="destructive"
-                              size="sm"
-                              onClick={() => handleCancel(reservation._id)}
-                              disabled={cancelingId === reservation._id}
-                            >
-                              {cancelingId === reservation._id ? 'Annulation...' : 'Confirmer'}
-                            </Button>
+                  <CardFooter className="pt-4 border-t border-gray-200 dark:border-gray-800">
+                    <div className="flex flex-col gap-3 w-full">
+                      {/* Actions principales */}
+                      <div className="flex gap-2 w-full">
+                        <Link href={`/events/${event._id}`} className="flex-1">
+                          <Button
+                            variant="outline"
+                            className="w-full group"
+                          >
+                            <Eye className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                            Voir les détails
+                          </Button>
+                        </Link>
+                        {reservation.status === 'CONFIRMED' && (
+                          <Button
+                            variant="default"
+                            size="default"
+                            onClick={() => handleDownloadTicket(reservation._id)}
+                            disabled={downloadingId === reservation._id}
+                            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white dark:bg-blue-500 dark:hover:bg-blue-600 shadow-sm hover:shadow-md transition-all font-medium"
+                          >
+                            {downloadingId === reservation._id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                                Téléchargement...
+                              </>
+                            ) : (
+                              <>
+                                <Download className="h-4 w-4" />
+                                Télécharger le ticket
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Action d'annulation */}
+                      {canCancel(reservation.status) && (
+                        <div className="w-full">
+                          {confirmCancelId === reservation._id ? (
+                            <div className="flex flex-col gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
+                              <p className="text-sm font-medium text-red-800 dark:text-red-300 mb-1">
+                                Confirmer l'annulation ?
+                              </p>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="destructive"
+                                  size="sm"
+                                  onClick={() => handleCancel(reservation._id)}
+                                  disabled={cancelingId === reservation._id}
+                                  className="flex-1"
+                                >
+                                  {cancelingId === reservation._id ? (
+                                    <>
+                                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-white border-t-transparent mr-2" />
+                                      Annulation...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Ban className="h-4 w-4 mr-2" />
+                                      Confirmer l'annulation
+                                    </>
+                                  )}
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setConfirmCancelId(null)}
+                                  disabled={cancelingId === reservation._id}
+                                  className="border-gray-300 dark:border-gray-700"
+                                >
+                                  Annuler
+                                </Button>
+                              </div>
+                            </div>
+                          ) : (
                             <Button
                               variant="outline"
                               size="sm"
-                              onClick={() => setConfirmCancelId(null)}
+                              onClick={() => setConfirmCancelId(reservation._id)}
                               disabled={cancelingId === reservation._id}
+                              className="w-full border-red-300 text-red-700 hover:bg-red-50 hover:text-red-800 dark:border-red-700 dark:text-red-400 dark:hover:bg-red-950"
                             >
-                              Annuler
+                              <X className="h-4 w-4 mr-2" />
+                              Annuler la réservation
                             </Button>
-                          </div>
-                        ) : (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => setConfirmCancelId(reservation._id)}
-                            disabled={cancelingId === reservation._id}
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </>
-                    )}
+                          )}
+                        </div>
+                      )}
+                    </div>
                   </CardFooter>
                 </Card>
               );
