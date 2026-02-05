@@ -11,7 +11,7 @@ import { EventStatus } from '../events/event.schema';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule);
-  
+
   const usersService = app.get(UsersService);
   const eventsService = app.get(EventsService);
   const reservationsService = app.get(ReservationsService);
@@ -23,11 +23,15 @@ async function bootstrap() {
     // Créer un compte Admin
     const adminEmail = 'admin@evenza.com';
     const adminPassword = 'admin123';
-    
+
     let admin = await usersService.findByEmail(adminEmail);
     if (!admin) {
       const hashedAdminPassword = await bcrypt.hash(adminPassword, 10);
-      admin = await usersService.create(adminEmail, hashedAdminPassword, 'ADMIN');
+      admin = await usersService.create(
+        adminEmail,
+        hashedAdminPassword,
+        'ADMIN',
+      );
       console.log('✅ Compte Admin créé:', adminEmail);
     } else {
       console.log('ℹ️  Compte Admin existe déjà:', adminEmail);
@@ -36,11 +40,18 @@ async function bootstrap() {
     // Créer un compte Participant
     const participantEmail = 'participant@evenza.com';
     const participantPassword = 'participant123';
-    
+
     let participant = await usersService.findByEmail(participantEmail);
     if (!participant) {
-      const hashedParticipantPassword = await bcrypt.hash(participantPassword, 10);
-      participant = await usersService.create(participantEmail, hashedParticipantPassword, 'PARTICIPANT');
+      const hashedParticipantPassword = await bcrypt.hash(
+        participantPassword,
+        10,
+      );
+      participant = await usersService.create(
+        participantEmail,
+        hashedParticipantPassword,
+        'PARTICIPANT',
+      );
       console.log('✅ Compte Participant créé:', participantEmail);
     } else {
       console.log('ℹ️  Compte Participant existe déjà:', participantEmail);
@@ -50,7 +61,8 @@ async function bootstrap() {
     const events = [
       {
         title: 'Formation NestJS Avancé',
-        description: 'Formation approfondie sur NestJS, les modules, les guards et les interceptors.',
+        description:
+          'Formation approfondie sur NestJS, les modules, les guards et les interceptors.',
         date: '2026-02-15T14:00:00',
         location: 'Salle A - Centre de Formation',
         capacity: 20,
@@ -58,7 +70,8 @@ async function bootstrap() {
       },
       {
         title: 'Atelier React et Next.js',
-        description: 'Découvrez React et Next.js pour créer des applications web modernes.',
+        description:
+          'Découvrez React et Next.js pour créer des applications web modernes.',
         date: '2026-02-20T10:00:00',
         location: 'Salle B - Centre de Formation',
         capacity: 15,
@@ -74,7 +87,8 @@ async function bootstrap() {
       },
       {
         title: 'Événement en brouillon',
-        description: 'Cet événement est en brouillon et ne sera pas visible publiquement.',
+        description:
+          'Cet événement est en brouillon et ne sera pas visible publiquement.',
         date: '2026-03-01T14:00:00',
         location: 'Salle C - Centre de Formation',
         capacity: 10,
@@ -85,7 +99,9 @@ async function bootstrap() {
     const createdEvents: EventDocument[] = [];
     for (const eventData of events) {
       // Vérifier si l'événement existe déjà par titre
-      const existingEvent = await eventModel.findOne({ title: eventData.title }).exec();
+      const existingEvent = await eventModel
+        .findOne({ title: eventData.title })
+        .exec();
       if (!existingEvent) {
         const event = await eventsService.create(eventData);
         createdEvents.push(event);
@@ -98,30 +114,38 @@ async function bootstrap() {
 
     // Créer des réservations pour le participant
     if (participant && createdEvents.length > 0) {
-      const publishedEvents = createdEvents.filter(e => e.status === EventStatus.PUBLISHED);
-      
+      const publishedEvents = createdEvents.filter(
+        (e) => e.status === EventStatus.PUBLISHED,
+      );
+
       if (publishedEvents.length > 0) {
         // Réservation 1 : En attente
         try {
           const reservation1 = await reservationsService.create(
             { eventId: publishedEvents[0]._id.toString() },
-            participant._id.toString()
+            participant._id.toString(),
           );
-          console.log(`✅ Réservation créée (PENDING) pour: ${publishedEvents[0].title}`);
-          
+          console.log(
+            `✅ Réservation créée (PENDING) pour: ${publishedEvents[0].title}`,
+          );
+
           // Réservation 2 : Confirmée (si deuxième événement disponible)
           if (publishedEvents.length > 1) {
             try {
               const reservation2 = await reservationsService.create(
                 { eventId: publishedEvents[1]._id.toString() },
-                participant._id.toString()
+                participant._id.toString(),
               );
               // Confirmer la réservation
               await reservationsService.confirm(reservation2._id.toString());
-              console.log(`✅ Réservation créée (CONFIRMED) pour: ${publishedEvents[1].title}`);
+              console.log(
+                `✅ Réservation créée (CONFIRMED) pour: ${publishedEvents[1].title}`,
+              );
             } catch (error: any) {
               if (!error.message.includes('déjà une réservation')) {
-                console.log(`ℹ️  Réservation existe déjà pour: ${publishedEvents[1].title}`);
+                console.log(
+                  `ℹ️  Réservation existe déjà pour: ${publishedEvents[1].title}`,
+                );
               }
             }
           }
@@ -131,20 +155,26 @@ async function bootstrap() {
             try {
               const reservation3 = await reservationsService.create(
                 { eventId: publishedEvents[2]._id.toString() },
-                participant._id.toString()
+                participant._id.toString(),
               );
               // Refuser la réservation
               await reservationsService.refuse(reservation3._id.toString());
-              console.log(`✅ Réservation créée (REFUSED) pour: ${publishedEvents[2].title}`);
+              console.log(
+                `✅ Réservation créée (REFUSED) pour: ${publishedEvents[2].title}`,
+              );
             } catch (error: any) {
               if (!error.message.includes('déjà une réservation')) {
-                console.log(`ℹ️  Réservation existe déjà pour: ${publishedEvents[2].title}`);
+                console.log(
+                  `ℹ️  Réservation existe déjà pour: ${publishedEvents[2].title}`,
+                );
               }
             }
           }
         } catch (error: any) {
           if (!error.message.includes('déjà une réservation')) {
-            console.log(`ℹ️  Réservation existe déjà pour: ${publishedEvents[0].title}`);
+            console.log(
+              `ℹ️  Réservation existe déjà pour: ${publishedEvents[0].title}`,
+            );
           }
         }
       }
@@ -159,7 +189,6 @@ async function bootstrap() {
     console.log('🎫 Réservations créées avec différents statuts');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('✅ Seeding terminé avec succès!');
-
   } catch (error) {
     console.error('❌ Erreur lors du seeding:', error);
     throw error;

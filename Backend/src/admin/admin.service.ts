@@ -33,36 +33,37 @@ export class AdminService {
 
   async getStats(): Promise<AdminStats> {
     const now = new Date();
-    
+
     const allEvents = await this.eventsService.findAll();
-    
+
     const upcomingEvents = allEvents.filter(
-      (event) => new Date(event.date) >= now && event.status === EventStatus.PUBLISHED
+      (event) =>
+        new Date(event.date) >= now && event.status === EventStatus.PUBLISHED,
     ).length;
 
     const publishedEvents = allEvents.filter(
-      (e) => e.status === EventStatus.PUBLISHED
+      (e) => e.status === EventStatus.PUBLISHED,
     ).length;
     const draftEvents = allEvents.filter(
-      (e) => e.status === EventStatus.DRAFT
+      (e) => e.status === EventStatus.DRAFT,
     ).length;
     const canceledEvents = allEvents.filter(
-      (e) => e.status === EventStatus.CANCELED
+      (e) => e.status === EventStatus.CANCELED,
     ).length;
 
     const allReservations = await this.reservationsService.findAll();
 
     const confirmedReservations = allReservations.filter(
-      (r) => r.status === ReservationStatus.CONFIRMED
+      (r) => r.status === ReservationStatus.CONFIRMED,
     ).length;
     const pendingReservations = allReservations.filter(
-      (r) => r.status === ReservationStatus.PENDING
+      (r) => r.status === ReservationStatus.PENDING,
     ).length;
     const refusedReservations = allReservations.filter(
-      (r) => r.status === ReservationStatus.REFUSED
+      (r) => r.status === ReservationStatus.REFUSED,
     ).length;
     const canceledReservations = allReservations.filter(
-      (r) => r.status === ReservationStatus.CANCELED
+      (r) => r.status === ReservationStatus.CANCELED,
     ).length;
 
     let totalFillRate = 0;
@@ -70,9 +71,10 @@ export class AdminService {
 
     for (const event of allEvents) {
       if (event.status === EventStatus.PUBLISHED) {
-        const confirmedCount = await this.reservationsService.getConfirmedCountForEvent(
-          event._id.toString()
-        );
+        const confirmedCount =
+          await this.reservationsService.getConfirmedCountForEvent(
+            event._id.toString(),
+          );
         if (event.capacity > 0) {
           const fillRate = (confirmedCount / event.capacity) * 100;
           totalFillRate += fillRate;
@@ -81,9 +83,10 @@ export class AdminService {
       }
     }
 
-    const averageFillRate = eventsWithReservations > 0 
-      ? Math.round((totalFillRate / eventsWithReservations) * 10) / 10 
-      : 0;
+    const averageFillRate =
+      eventsWithReservations > 0
+        ? Math.round((totalFillRate / eventsWithReservations) * 10) / 10
+        : 0;
 
     return {
       upcomingEvents,

@@ -50,15 +50,17 @@ export class PdfService {
           .moveDown(0.2)
           .text(`Description: ${event.description}`)
           .moveDown(0.2)
-          .text(`Date: ${new Date(event.date).toLocaleDateString('fr-FR', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          })} à ${new Date(event.date).toLocaleTimeString('fr-FR', {
-            hour: '2-digit',
-            minute: '2-digit',
-          })}`)
+          .text(
+            `Date: ${new Date(event.date).toLocaleDateString('fr-FR', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })} à ${new Date(event.date).toLocaleTimeString('fr-FR', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}`,
+          )
           .moveDown(0.2)
           .text(`Lieu: ${event.location}`)
           .moveDown(1);
@@ -76,41 +78,47 @@ export class PdfService {
           .moveDown(0.2)
           .text(`Statut: ${this.getStatusLabel(reservation.status)}`)
           .moveDown(0.2)
-          .text(`Date de réservation: ${(reservation as any).createdAt ? new Date((reservation as any).createdAt).toLocaleDateString('fr-FR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
-          }) : 'N/A'}`)
+          .text(
+            `Date de réservation: ${
+              (reservation as any).createdAt
+                ? new Date((reservation as any).createdAt).toLocaleDateString(
+                    'fr-FR',
+                    {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    },
+                  )
+                : 'N/A'
+            }`,
+          )
           .moveDown(1);
 
         const codeText = `Code de réservation: ${reservation._id.toString()}`;
         const currentY = doc.y;
-        
-        doc
-          .fontSize(12)
-          .font('Helvetica')
-          .fillColor('#000000');
-        
+
+        doc.fontSize(12).font('Helvetica').fillColor('#000000');
+
         const textWidth = doc.widthOfString(codeText);
-        const textHeight = doc.heightOfString(codeText, { width: doc.page.width - 100 });
+        const textHeight = doc.heightOfString(codeText, {
+          width: doc.page.width - 100,
+        });
         const x = (doc.page.width - textWidth) / 2;
-        
+
         doc
           .rect(x - 10, currentY - 5, textWidth + 20, textHeight + 10)
           .fillColor('#f0f0f0')
           .fill()
           .fillColor('#000000');
-        
-        doc
-          .text(codeText, x, currentY)
-          .moveDown(1);
+
+        doc.text(codeText, x, currentY).moveDown(1);
 
         doc
           .fontSize(10)
           .font('Helvetica-Oblique')
-          .text('Veuillez présenter ce ticket à l\'entrée de l\'événement.', {
+          .text("Veuillez présenter ce ticket à l'entrée de l'événement.", {
             align: 'center',
           })
           .moveDown(0.5);
