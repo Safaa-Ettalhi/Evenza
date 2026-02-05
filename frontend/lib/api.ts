@@ -61,10 +61,6 @@ interface RegisterResponse {
 
 export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  console.log('🔗 API URL configurée:', API_URL);
-}
-
 class ApiService {
   private async request<T>(
     endpoint: string,
@@ -82,27 +78,18 @@ class ApiService {
       });
 
       if (!response.ok) {
-        let errorMessage = 'Une erreur est survenue';
-        try {
-          const error = await response.json();
-          errorMessage = error.message || error.error || errorMessage;
-        } catch {
-          errorMessage = response.statusText || errorMessage;
-        }
-        throw new Error(errorMessage);
+        const error = await response.json().catch(() => ({
+          message: 'Une erreur est survenue',
+        }));
+        throw new Error(error.message || 'Une erreur est survenue');
       }
 
       return response.json();
     } catch (error) {
-      if (error instanceof TypeError) {
-        if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
-          throw new Error(`Impossible de se connecter au serveur à ${url}. Vérifiez que le backend est démarré sur le port 4000.`);
-        }
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error(`Impossible de se connecter au serveur à ${url}. Vérifiez que le backend est démarré sur le port 3000.`);
       }
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error('Une erreur inattendue est survenue');
+      throw error;
     }
   }
 
@@ -125,11 +112,17 @@ class ApiService {
       throw new Error('Token d\'authentification manquant');
     }
     
+    const trimmedToken = token.trim();
+    
+    if (!trimmedToken.includes('.') || trimmedToken.split('.').length !== 3) {
+      throw new Error('Format de token invalide. Veuillez vous reconnecter.');
+    }
+    
     return this.request<T>(endpoint, {
       ...options,
       headers: {
         ...options.headers,
-        Authorization: `Bearer ${token.trim()}`,
+        Authorization: `Bearer ${trimmedToken}`,
       },
     });
   }

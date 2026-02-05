@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
+export type ReservationDocument = Reservation & Document;
+
 export enum ReservationStatus {
   PENDING = 'PENDING',
   CONFIRMED = 'CONFIRMED',
@@ -8,17 +10,19 @@ export enum ReservationStatus {
   CANCELED = 'CANCELED',
 }
 
-export type ReservationDocument = Reservation & Document;
-
 @Schema({ timestamps: true })
 export class Reservation {
-  @Prop({ required: true, type: Types.ObjectId, ref: 'Event' })
+  @Prop({ type: Types.ObjectId, ref: 'Event', required: true })
   eventId!: Types.ObjectId;
 
-  @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId!: Types.ObjectId;
 
-  @Prop({ required: true, enum: ReservationStatus, default: ReservationStatus.PENDING })
+  @Prop({ 
+    type: String, 
+    enum: ReservationStatus, 
+    default: ReservationStatus.PENDING 
+  })
   status!: ReservationStatus;
 }
 

@@ -5,7 +5,17 @@ import { apiService, User } from '@/lib/api';
 
 function parseTokenToUser(token: string): User | null {
   try {
-    const payload = JSON.parse(atob(token.split('.')[1]));
+ const parts = token.split('.');
+    if (parts.length !== 3) {
+      return null;
+    }
+    
+    const payload = JSON.parse(atob(parts[1]));
+    
+    if (!payload.sub || !payload.email || !payload.role) {
+      return null;
+    }
+    
     return { userId: payload.sub, email: payload.email, role: payload.role };
   } catch {
     return null;
@@ -38,6 +48,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     const stored = localStorage.getItem('token');
     if (stored) {
+      if (!stored.includes('.') || stored.split('.').length !== 3) {
+        localStorage.removeItem('token');
+        setIsLoading(false);
+        return;
+      }
+      
       const u = parseTokenToUser(stored);
       if (u) {
         setToken(stored);
