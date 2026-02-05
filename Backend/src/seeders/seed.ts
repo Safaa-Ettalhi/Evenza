@@ -51,7 +51,7 @@ async function bootstrap() {
       {
         title: 'Formation NestJS Avancé',
         description: 'Formation approfondie sur NestJS, les modules, les guards et les interceptors.',
-        date: new Date('2026-02-15T14:00:00'),
+        date: '2026-02-15T14:00:00',
         location: 'Salle A - Centre de Formation',
         capacity: 20,
         status: EventStatus.PUBLISHED,
@@ -59,7 +59,7 @@ async function bootstrap() {
       {
         title: 'Atelier React et Next.js',
         description: 'Découvrez React et Next.js pour créer des applications web modernes.',
-        date: new Date('2026-02-20T10:00:00'),
+        date: '2026-02-20T10:00:00',
         location: 'Salle B - Centre de Formation',
         capacity: 15,
         status: EventStatus.PUBLISHED,
@@ -67,7 +67,7 @@ async function bootstrap() {
       {
         title: 'Conférence sur le DevOps',
         description: 'Introduction au DevOps avec Docker et CI/CD.',
-        date: new Date('2026-02-25T16:00:00'),
+        date: '2026-02-25T16:00:00',
         location: 'Amphithéâtre - Centre de Formation',
         capacity: 50,
         status: EventStatus.PUBLISHED,
@@ -75,14 +75,14 @@ async function bootstrap() {
       {
         title: 'Événement en brouillon',
         description: 'Cet événement est en brouillon et ne sera pas visible publiquement.',
-        date: new Date('2026-03-01T14:00:00'),
+        date: '2026-03-01T14:00:00',
         location: 'Salle C - Centre de Formation',
         capacity: 10,
         status: EventStatus.DRAFT,
       },
     ];
 
-    const createdEvents = [];
+    const createdEvents: EventDocument[] = [];
     for (const eventData of events) {
       // Vérifier si l'événement existe déjà par titre
       const existingEvent = await eventModel.findOne({ title: eventData.title }).exec();

@@ -20,10 +20,6 @@ export class ReservationsService {
       throw new BadRequestException('Seuls les événements publiés peuvent être réservés');
     }
 
-    if (event.status === EventStatus.CANCELED) {
-      throw new BadRequestException('Impossible de réserver un événement annulé');
-    }
-
     const confirmedCount = await this.getConfirmedCountForEvent(createReservationDto.eventId);
     if (confirmedCount >= event.capacity) {
       throw new BadRequestException('Cet événement est complet');
