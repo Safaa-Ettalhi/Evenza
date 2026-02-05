@@ -2,8 +2,31 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import request from 'supertest';
 import { App } from 'supertest/types';
+import * as bcrypt from 'bcrypt';
 import { AppModule } from '../src/app.module';
 import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
+import { UsersService } from '../src/users/users.service';
+
+async function ensureTestUsers(usersService: UsersService): Promise<void> {
+  const adminEmail = 'admin@evenza.com';
+  const participantEmail = 'participant@evenza.com';
+
+  let admin = await usersService.findByEmail(adminEmail);
+  if (!admin) {
+    const hashedAdmin = await bcrypt.hash('admin123', 10);
+    admin = await usersService.create(adminEmail, hashedAdmin, 'ADMIN');
+  }
+
+  let participant = await usersService.findByEmail(participantEmail);
+  if (!participant) {
+    const hashedParticipant = await bcrypt.hash('participant123', 10);
+    participant = await usersService.create(
+      participantEmail,
+      hashedParticipant,
+      'PARTICIPANT',
+    );
+  }
+}
 
 describe('ReservationsController (e2e)', () => {
   let app: INestApplication<App>;
@@ -31,6 +54,9 @@ describe('ReservationsController (e2e)', () => {
       credentials: true,
     });
     await app.init();
+
+    const usersService = moduleFixture.get(UsersService);
+    await ensureTestUsers(usersService);
 
     const adminLoginResponse = await request(app.getHttpServer())
       .post('/auth/login')
