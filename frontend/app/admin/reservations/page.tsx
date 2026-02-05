@@ -1,7 +1,6 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
-import { Header } from '@/components/Header';
 import { apiService, Reservation, Event } from '@/lib/api';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -174,8 +173,7 @@ export default function AdminReservationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
-      <Header />
+    <div>
       <main className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Gestion des réservations
@@ -335,8 +333,8 @@ export default function AdminReservationsPage() {
                     )}
                   </CardContent>
 
-                  <CardFooter className="pt-4 flex flex-col gap-2">
-                    <div className="flex gap-2 w-full">
+                  <CardFooter className="pt-4">
+                    <div className="flex gap-2 w-full flex-wrap">
                       {reservation.status === 'PENDING' && (
                         <>
                           <Button
@@ -344,18 +342,38 @@ export default function AdminReservationsPage() {
                             size="sm"
                             onClick={() => handleConfirm(reservation._id)}
                             disabled={processingId === reservation._id}
-                            className="flex-1"
+                            className="flex-1 min-w-[120px] bg-green-600 hover:bg-green-700 text-white dark:bg-green-600 dark:hover:bg-green-700"
                           >
-                            {processingId === reservation._id ? 'Confirmation...' : 'Confirmer'}
+                            {processingId === reservation._id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
+                                Confirmation...
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="h-4 w-4 mr-2" />
+                                Confirmer
+                              </>
+                            )}
                           </Button>
                           <Button
                             variant="destructive"
                             size="sm"
                             onClick={() => handleRefuse(reservation._id)}
                             disabled={processingId === reservation._id}
-                            className="flex-1"
+                            className="flex-1 min-w-[120px] bg-red-600 hover:bg-red-700 text-white dark:bg-red-600 dark:hover:bg-red-700"
                           >
-                            Refuser
+                            {processingId === reservation._id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-white mr-2" />
+                                Refus...
+                              </>
+                            ) : (
+                              <>
+                                <XCircle className="h-4 w-4 mr-2" />
+                                Refuser
+                              </>
+                            )}
                           </Button>
                         </>
                       )}
@@ -365,9 +383,19 @@ export default function AdminReservationsPage() {
                           size="sm"
                           onClick={() => handleCancel(reservation._id)}
                           disabled={processingId === reservation._id}
-                          className="w-full"
+                          className={`${reservation.status === 'PENDING' ? 'flex-1 min-w-[120px]' : 'w-full'} border-orange-300 text-orange-700 hover:bg-orange-50 hover:text-orange-800 dark:border-orange-700 dark:text-orange-400 dark:hover:bg-orange-950`}
                         >
-                          {processingId === reservation._id ? 'Annulation...' : 'Annuler'}
+                          {processingId === reservation._id ? (
+                            <>
+                              <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-orange-600 mr-2" />
+                              Annulation...
+                            </>
+                          ) : (
+                            <>
+                              <Ban className="h-4 w-4 mr-2" />
+                              Annuler
+                            </>
+                          )}
                         </Button>
                       )}
                     </div>
