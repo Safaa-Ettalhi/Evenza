@@ -19,7 +19,6 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     let secret = configService.get<string>('JWT_SECRET') || 'secret-evenza';
     secret = secret.replace(/^['"]|['"]$/g, '');
 
-    
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -31,12 +30,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!payload || !payload.email) {
       throw new UnauthorizedException('Token invalide : payload manquant');
     }
-    
+
     const user = await this.usersService.findByEmail(payload.email);
     if (!user) {
       throw new UnauthorizedException('Utilisateur non trouvé');
     }
-    
+
     return {
       sub: user._id.toString(),
       userId: user._id.toString(),

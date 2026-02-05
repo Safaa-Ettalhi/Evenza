@@ -93,7 +93,7 @@ describe('AuthService', () => {
       });
     });
 
-    it('devrait lancer une exception si l\'email existe déjà', async () => {
+    it("devrait lancer une exception si l'email existe déjà", async () => {
       const registerDto: RegisterDto = {
         email: 'existing@example.com',
         password: 'password123',
@@ -136,7 +136,10 @@ describe('AuthService', () => {
       const result = await service.login(loginDto);
 
       expect(usersService.findByEmail).toHaveBeenCalledWith(loginDto.email);
-      expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, user.password);
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        loginDto.password,
+        user.password,
+      );
       expect(jwtService.sign).toHaveBeenCalledWith({
         sub: 'user_id',
         email: user.email,
@@ -145,7 +148,7 @@ describe('AuthService', () => {
       expect(result).toEqual({ access_token: token });
     });
 
-    it('devrait lancer une exception si l\'utilisateur n\'existe pas', async () => {
+    it("devrait lancer une exception si l'utilisateur n'existe pas", async () => {
       const loginDto: LoginDto = {
         email: 'nonexistent@example.com',
         password: 'password123',
@@ -181,7 +184,10 @@ describe('AuthService', () => {
         CustomUnauthorizedException,
       );
       expect(usersService.findByEmail).toHaveBeenCalledWith(loginDto.email);
-      expect(bcrypt.compare).toHaveBeenCalledWith(loginDto.password, user.password);
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        loginDto.password,
+        user.password,
+      );
       expect(jwtService.sign).not.toHaveBeenCalled();
     });
   });
