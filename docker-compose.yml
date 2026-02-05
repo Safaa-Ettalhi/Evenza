@@ -1,0 +1,60 @@
+services:
+  mongodb:
+    image: mongo:7
+    container_name: evenza-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: evenza
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - evenza-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: evenza-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      MONGODB_URI: mongodb://mongodb:27017/evenza
+      JWT_SECRET: ${JWT_SECRET:-ton-secret-jwt-super-securise}
+      FRONTEND_URL: http://localhost:3001
+    depends_on:
+      - mongodb
+    networks:
+      - evenza-network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: evenza-frontend
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    depends_on:
+      - backend
+    networks:
+      - evenza-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  mongodb_data:
+
+networks:
+  evenza-network:
+    driver: bridge
