@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { UsersModule } from './users/users.module';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { ReservationsModule } from './reservations/reservations.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
     MongooseModule.forRoot(process.env.MONGODB_URI ?? 'mongodb://localhost:27017/evenza'),
     UsersModule,
     AuthModule,
+    ReservationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
