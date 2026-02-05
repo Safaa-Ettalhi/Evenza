@@ -22,4 +22,5 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`🚀 Backend démarré sur le port ${port}`);
 }
+
 bootstrap();
