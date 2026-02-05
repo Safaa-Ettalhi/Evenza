@@ -59,7 +59,11 @@ interface RegisterResponse {
   userId: string;
 }
 
-export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('🔗 API URL configurée:', API_URL);
+}
 
 class ApiService {
   private async request<T>(
@@ -90,10 +94,15 @@ class ApiService {
 
       return response.json();
     } catch (error) {
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        throw new Error('Impossible de se connecter au serveur. Vérifiez que le backend est démarré.');
+      if (error instanceof TypeError) {
+        if (error.message.includes('fetch') || error.message.includes('Failed to fetch')) {
+          throw new Error(`Impossible de se connecter au serveur à ${url}. Vérifiez que le backend est démarré sur le port 4000.`);
+        }
       }
-      throw error;
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error('Une erreur inattendue est survenue');
     }
   }
 

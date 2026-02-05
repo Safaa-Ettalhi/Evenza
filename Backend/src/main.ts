@@ -8,7 +8,7 @@ async function bootstrap() {
   
   // Configuration CORS pour permettre les requêtes depuis le frontend
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: process.env.FRONTEND_URL || 'http://localhost:3001',
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
@@ -21,8 +21,9 @@ async function bootstrap() {
   }));
   app.useGlobalFilters(new HttpExceptionFilter());
   
-  const port = process.env.PORT || 4000;
+  const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`🚀 Backend démarré sur http://localhost:${port}`);
+  console.log(` Backend démarré sur http://localhost:${port}`);
+  console.log(`CORS activé pour: ${process.env.FRONTEND_URL || 'http://localhost:3001'}`);
 }
 bootstrap();
