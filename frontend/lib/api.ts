@@ -78,10 +78,14 @@ class ApiService {
       });
 
       if (!response.ok) {
-        const error = await response.json().catch(() => ({
-          message: 'Une erreur est survenue',
-        }));
-        throw new Error(error.message || 'Une erreur est survenue');
+        let errorMessage = 'Une erreur est survenue';
+        try {
+          const error = await response.json();
+          errorMessage = error.message || error.error || errorMessage;
+        } catch {
+          errorMessage = response.statusText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       return response.json();
@@ -108,11 +112,15 @@ class ApiService {
   }
 
   private requestWithAuth<T>(endpoint: string, options: RequestInit, token: string): Promise<T> {
+    if (!token || token.trim() === '') {
+      throw new Error('Token d\'authentification manquant');
+    }
+    
     return this.request<T>(endpoint, {
       ...options,
       headers: {
         ...options.headers,
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token.trim()}`,
       },
     });
   }

@@ -38,7 +38,11 @@ export default function MesReservationsPage() {
 
   useEffect(() => {
     async function fetchReservations() {
-      if (!token || !isAuthenticated) return;
+      if (!token || !isAuthenticated) {
+        setError('Vous devez être connecté pour voir vos réservations');
+        setIsLoadingReservations(false);
+        return;
+      }
 
       try {
         setIsLoadingReservations(true);
@@ -46,7 +50,13 @@ export default function MesReservationsPage() {
         const data = await apiService.getMyReservations(token);
         setReservations(data);
       } catch (err: any) {
-        setError(err.message || 'Impossible de charger vos réservations');
+        const errorMessage = err.message || 'Impossible de charger vos réservations';
+        setError(errorMessage);
+        if (errorMessage.toLowerCase().includes('unauthorized') || errorMessage.toLowerCase().includes('non autorisé')) {
+          setTimeout(() => {
+            router.push('/login');
+          }, 2000);
+        }
       } finally {
         setIsLoadingReservations(false);
       }
@@ -55,7 +65,7 @@ export default function MesReservationsPage() {
     if (isAuthenticated && token) {
       fetchReservations();
     }
-  }, [isAuthenticated, token]);
+  }, [isAuthenticated, token, router]);
 
   const handleCancel = async (reservationId: string) => {
     if (!token) return;
