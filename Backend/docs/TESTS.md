@@ -1,10 +1,20 @@
-# Documentation des Tests - Backend Evenza
+# Documentation des Tests - Evenza
 
-Cette documentation décrit la stratégie de tests, l'organisation des fichiers et les commandes pour exécuter les tests du backend.
+Cette documentation décrit la stratégie de tests pour le backend et le frontend.
 
 ---
 
 ## Table des matières
+
+1. [Backend](#backend)
+2. [Frontend](#frontend)
+3. [Table des matières détaillée](#table-des-matières-détaillée)
+
+---
+
+## Backend
+
+### Table des matières détaillée
 
 1. [Vue d'ensemble](#vue-densemble)
 2. [Prérequis](#prérequis)
@@ -18,6 +28,8 @@ Cette documentation décrit la stratégie de tests, l'organisation des fichiers 
 ---
 
 ## Vue d'ensemble
+
+### Backend
 
 Le backend Evenza dispose de deux types de tests :
 
@@ -298,6 +310,18 @@ npm test -- auth.service.spec.ts --verbose
 2. **Utiliser des emails uniques** dans les tests E2E (ex: `test-${Date.now()}@example.com`) pour éviter les conflits
 3. **Isoler les tests** : chaque test E2E crée ses propres données pour éviter les effets de bord
 4. **Nettoyer la base** : en développement, vous pouvez réinitialiser la base avec `npm run seed` si nécessaire
+
+---
+
+## Frontend
+
+Les tests frontend sont documentés dans [frontend/docs/TESTS.md](../../frontend/docs/TESTS.md).
+
+**Résumé :** 31 tests avec Jest + React Testing Library (Auth, Events, Reservations, Header).
+
+```bash
+cd frontend && npm test
+```
 
 ---
 
