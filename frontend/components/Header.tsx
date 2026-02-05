@@ -33,6 +33,9 @@ export function Header() {
                       <Link href="/admin/events">Événements</Link>
                     </Button>
                     <Button variant="ghost" className="hidden sm:flex" asChild>
+                      <Link href="/admin/reservations">Réservations</Link>
+                    </Button>
+                    <Button variant="ghost" className="hidden sm:flex" asChild>
                       <Link href="/admin/dashboard">Dashboard</Link>
                     </Button>
                   </>

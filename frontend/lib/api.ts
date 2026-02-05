@@ -176,6 +176,22 @@ class ApiService {
     return this.requestWithAuth<Reservation[]>('/reservations/me', { method: 'GET' }, token);
   }
 
+  async getAllReservations(token: string): Promise<Reservation[]> {
+    return this.requestWithAuth<Reservation[]>('/reservations', { method: 'GET' }, token);
+  }
+
+  async getReservationsByEvent(eventId: string, token: string): Promise<Reservation[]> {
+    return this.requestWithAuth<Reservation[]>(`/reservations/event/${eventId}`, { method: 'GET' }, token);
+  }
+
+  async confirmReservation(id: string, token: string): Promise<Reservation> {
+    return this.requestWithAuth<Reservation>(`/reservations/${id}/confirm`, { method: 'PATCH' }, token);
+  }
+
+  async refuseReservation(id: string, token: string): Promise<Reservation> {
+    return this.requestWithAuth<Reservation>(`/reservations/${id}/refuse`, { method: 'PATCH' }, token);
+  }
+
   async cancelReservation(id: string, token: string): Promise<Reservation> {
     return this.requestWithAuth<Reservation>(`/reservations/${id}/cancel`, { method: 'PATCH' }, token);
   }
