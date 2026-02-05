@@ -28,7 +28,10 @@ export class EventsService {
   }
 
   async findPublished(): Promise<EventDocument[]> {
-    return this.eventModel.find({ status: EventStatus.PUBLISHED }).sort({ date: 1 }).exec();
+    return this.eventModel
+      .find({ status: EventStatus.PUBLISHED })
+      .sort({ date: 1 })
+      .exec();
   }
 
   async findOne(id: string): Promise<EventDocument> {
@@ -39,7 +42,10 @@ export class EventsService {
     return event;
   }
 
-  async update(id: string, updateEventDto: UpdateEventDto): Promise<EventDocument> {
+  async update(
+    id: string,
+    updateEventDto: UpdateEventDto,
+  ): Promise<EventDocument> {
     const updateData: any = { ...updateEventDto };
     if (updateEventDto.date) {
       updateData.date = new Date(updateEventDto.date);

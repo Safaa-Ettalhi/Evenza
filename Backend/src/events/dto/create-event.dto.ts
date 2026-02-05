@@ -1,4 +1,12 @@
-import { IsString, IsNotEmpty, IsDateString, IsInt, Min, IsOptional, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsDateString,
+  IsInt,
+  Min,
+  IsOptional,
+  IsEnum,
+} from 'class-validator';
 import { EventStatus } from '../event.schema';
 
 export class CreateEventDto {
@@ -23,6 +31,8 @@ export class CreateEventDto {
   capacity!: number;
 
   @IsOptional()
-  @IsEnum(EventStatus, { message: 'Le statut doit être DRAFT, PUBLISHED ou CANCELED' })
+  @IsEnum(EventStatus, {
+    message: 'Le statut doit être DRAFT, PUBLISHED ou CANCELED',
+  })
   status?: EventStatus;
 }

@@ -12,11 +12,11 @@ describe('EventsService', () => {
   let eventModel: any;
   let mockInstance: any;
 
-  const mockEventModel: any = jest.fn(function(data: any) {
+  const mockEventModel: any = jest.fn(function (data: any) {
     mockInstance = {
       _id: 'event_id',
       ...data,
-      save: jest.fn().mockImplementation(function() {
+      save: jest.fn().mockImplementation(function () {
         return Promise.resolve(this);
       }),
     };
@@ -35,7 +35,7 @@ describe('EventsService', () => {
         EventsService,
         {
           provide: getModelToken(Event.name),
-          useValue: mockEventModel as any,
+          useValue: mockEventModel,
         },
       ],
     }).compile();
@@ -100,26 +100,34 @@ describe('EventsService', () => {
     });
 
     it('devrait filtrer par statut si fourni', async () => {
-      const events = [{ _id: '1', title: 'Event 1', status: EventStatus.PUBLISHED }];
+      const events = [
+        { _id: '1', title: 'Event 1', status: EventStatus.PUBLISHED },
+      ];
 
       mockEventModel.exec.mockResolvedValue(events);
 
       const result = await service.findAll(EventStatus.PUBLISHED);
 
-      expect(mockEventModel.find).toHaveBeenCalledWith({ status: EventStatus.PUBLISHED });
+      expect(mockEventModel.find).toHaveBeenCalledWith({
+        status: EventStatus.PUBLISHED,
+      });
       expect(result).toEqual(events);
     });
   });
 
   describe('findPublished', () => {
     it('devrait retourner uniquement les événements publiés', async () => {
-      const events = [{ _id: '1', title: 'Event 1', status: EventStatus.PUBLISHED }];
+      const events = [
+        { _id: '1', title: 'Event 1', status: EventStatus.PUBLISHED },
+      ];
 
       mockEventModel.exec.mockResolvedValue(events);
 
       const result = await service.findPublished();
 
-      expect(mockEventModel.find).toHaveBeenCalledWith({ status: EventStatus.PUBLISHED });
+      expect(mockEventModel.find).toHaveBeenCalledWith({
+        status: EventStatus.PUBLISHED,
+      });
       expect(mockEventModel.sort).toHaveBeenCalledWith({ date: 1 });
       expect(result).toEqual(events);
     });
@@ -137,7 +145,7 @@ describe('EventsService', () => {
       expect(result).toEqual(event);
     });
 
-    it('devrait lancer une exception si l\'événement n\'existe pas', async () => {
+    it("devrait lancer une exception si l'événement n'existe pas", async () => {
       mockEventModel.exec.mockResolvedValue(null);
 
       await expect(service.findOne('nonexistent_id')).rejects.toThrow(
@@ -188,7 +196,7 @@ describe('EventsService', () => {
       );
     });
 
-    it('devrait lancer une exception si l\'événement n\'existe pas', async () => {
+    it("devrait lancer une exception si l'événement n'existe pas", async () => {
       const updateDto: UpdateEventDto = { title: 'Updated Title' };
 
       mockEventModel.exec.mockResolvedValue(null);
@@ -219,7 +227,7 @@ describe('EventsService', () => {
       expect(result.status).toBe(EventStatus.PUBLISHED);
     });
 
-    it('devrait lancer une exception si l\'événement n\'existe pas', async () => {
+    it("devrait lancer une exception si l'événement n'existe pas", async () => {
       mockEventModel.exec.mockResolvedValue(null);
 
       await expect(service.publish('nonexistent_id')).rejects.toThrow(
@@ -248,7 +256,7 @@ describe('EventsService', () => {
       expect(result.status).toBe(EventStatus.CANCELED);
     });
 
-    it('devrait lancer une exception si l\'événement n\'existe pas', async () => {
+    it("devrait lancer une exception si l'événement n'existe pas", async () => {
       mockEventModel.exec.mockResolvedValue(null);
 
       await expect(service.cancel('nonexistent_id')).rejects.toThrow(
