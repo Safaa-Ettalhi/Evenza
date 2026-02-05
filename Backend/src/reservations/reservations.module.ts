@@ -4,6 +4,7 @@ import { ReservationsService } from './reservations.service';
 import { ReservationsController } from './reservations.controller';
 import { Reservation, ReservationSchema } from './reservation.schema';
 import { EventsModule } from '../events/events.module';
+import { PdfModule } from '../pdf/pdf.module';
 
 @Module({
   imports: [
@@ -11,6 +12,7 @@ import { EventsModule } from '../events/events.module';
       { name: Reservation.name, schema: ReservationSchema },
     ]),
     EventsModule,
+    PdfModule,
   ],
   controllers: [ReservationsController],
   providers: [ReservationsService],
