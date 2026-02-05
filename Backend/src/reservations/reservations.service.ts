@@ -14,19 +14,36 @@ export class ReservationsService {
   ) {}
 
   async create(createReservationDto: CreateReservationDto, userId: string): Promise<ReservationDocument> {
-    const event = await this.eventsService.findOne(createReservationDto.eventId);
+
+    let eventId: string = createReservationDto.eventId;
+    
+    if (typeof eventId === 'object' && eventId !== null) {
+      eventId = (eventId as any)._id?.toString() || (eventId as any).id?.toString() || String(eventId);
+    } else if (typeof eventId === 'string' && eventId.trim().startsWith('{')) {
+      try {
+        const parsed = JSON.parse(eventId);
+        eventId = parsed._id?.toString() || parsed.id?.toString() || eventId;
+      } catch {
+      }
+    }
+    
+    if (!eventId || eventId.length !== 24) {
+      throw new BadRequestException('ID d\'événement invalide');
+    }
+
+    const event = await this.eventsService.findOne(eventId);
     
     if (event.status !== EventStatus.PUBLISHED) {
       throw new BadRequestException('Seuls les événements publiés peuvent être réservés');
     }
 
-    const confirmedCount = await this.getConfirmedCountForEvent(createReservationDto.eventId);
+    const confirmedCount = await this.getConfirmedCountForEvent(eventId);
     if (confirmedCount >= event.capacity) {
       throw new BadRequestException('Cet événement est complet');
     }
 
     const existingReservation = await this.reservationModel.findOne({
-      eventId: createReservationDto.eventId,
+      eventId: eventId,
       userId: userId,
       status: { $in: [ReservationStatus.PENDING, ReservationStatus.CONFIRMED] },
     }).exec();
@@ -36,7 +53,7 @@ export class ReservationsService {
     }
 
     const reservation = new this.reservationModel({
-      ...createReservationDto,
+      eventId: eventId,
       userId,
       status: ReservationStatus.PENDING,
     });
@@ -67,12 +84,14 @@ export class ReservationsService {
       .exec();
   }
 
-  async findOne(id: string): Promise<ReservationDocument> {
-    const reservation = await this.reservationModel
-      .findById(id)
-      .populate('eventId')
-      .populate('userId', 'email')
-      .exec();
+  async findOne(id: string, populate: boolean = true): Promise<ReservationDocument> {
+    let query = this.reservationModel.findById(id);
+    
+    if (populate) {
+      query = query.populate('eventId').populate('userId', 'email');
+    }
+    
+    const reservation = await query.exec();
 
     if (!reservation) {
       throw new NotFoundException('Réservation non trouvée');
@@ -82,7 +101,7 @@ export class ReservationsService {
   }
 
   async confirm(id: string): Promise<ReservationDocument> {
-    const reservation = await this.findOne(id);
+    const reservation = await this.findOne(id, false);
 
     if (reservation.status === ReservationStatus.CONFIRMED) {
       throw new BadRequestException('Cette réservation est déjà confirmée');
@@ -92,8 +111,9 @@ export class ReservationsService {
       throw new BadRequestException('Impossible de confirmer une réservation annulée ou refusée');
     }
 
-    const event = await this.eventsService.findOne(reservation.eventId.toString());
-    const confirmedCount = await this.getConfirmedCountForEvent(reservation.eventId.toString());
+    const eventId = reservation.eventId.toString();
+    const event = await this.eventsService.findOne(eventId);
+    const confirmedCount = await this.getConfirmedCountForEvent(eventId);
     
     if (confirmedCount >= event.capacity) {
       throw new BadRequestException('La capacité maximale de l\'événement est atteinte');
@@ -104,7 +124,7 @@ export class ReservationsService {
   }
 
   async refuse(id: string): Promise<ReservationDocument> {
-    const reservation = await this.findOne(id);
+    const reservation = await this.findOne(id, false);
 
     if (reservation.status === ReservationStatus.REFUSED) {
       throw new BadRequestException('Cette réservation est déjà refusée');
@@ -119,7 +139,8 @@ export class ReservationsService {
   }
 
   async cancel(id: string, userId?: string): Promise<ReservationDocument> {
-    const reservation = await this.findOne(id);
+    const reservation = await this.findOne(id, false);
+    
     if (userId && reservation.userId.toString() !== userId) {
       throw new BadRequestException('Vous ne pouvez pas annuler cette réservation');
     }

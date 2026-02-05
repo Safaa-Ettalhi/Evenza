@@ -53,7 +53,7 @@ export default function EventDetailPage() {
       setError(null);
       setSuccess(null);
 
-      await apiService.createReservation({ eventId: event._id }, token);
+      await apiService.createReservation({ eventId: typeof event._id === 'string' ? event._id : String(event._id) }, token);
       
       setSuccess('Votre réservation a été créée avec succès ! Elle est en attente de confirmation.');
       

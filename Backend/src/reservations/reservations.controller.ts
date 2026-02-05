@@ -23,6 +23,16 @@ export class ReservationsController {
   @Roles('PARTICIPANT', 'ADMIN')
   create(@Body() createReservationDto: CreateReservationDto, @Request() req: any) {
     const userId = req.user.sub;
+    if (typeof createReservationDto.eventId !== 'string') {
+      if (typeof createReservationDto.eventId === 'object' && createReservationDto.eventId !== null) {
+        createReservationDto.eventId = (createReservationDto.eventId as any)._id?.toString() || 
+                                       (createReservationDto.eventId as any).id?.toString() || 
+                                       String(createReservationDto.eventId);
+      } else {
+        createReservationDto.eventId = String(createReservationDto.eventId);
+      }
+    }
+    
     return this.reservationsService.create(createReservationDto, userId);
   }
 
