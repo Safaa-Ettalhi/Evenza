@@ -29,18 +29,25 @@ export class ReservationsController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PARTICIPANT', 'ADMIN')
-  create(@Body() createReservationDto: CreateReservationDto, @Request() req: any) {
+  create(
+    @Body() createReservationDto: CreateReservationDto,
+    @Request() req: any,
+  ) {
     const userId = req.user.sub;
     if (typeof createReservationDto.eventId !== 'string') {
-      if (typeof createReservationDto.eventId === 'object' && createReservationDto.eventId !== null) {
-        createReservationDto.eventId = (createReservationDto.eventId as any)._id?.toString() || 
-                                       (createReservationDto.eventId as any).id?.toString() || 
-                                       String(createReservationDto.eventId);
+      if (
+        typeof createReservationDto.eventId === 'object' &&
+        createReservationDto.eventId !== null
+      ) {
+        createReservationDto.eventId =
+          (createReservationDto.eventId as any)._id?.toString() ||
+          (createReservationDto.eventId as any).id?.toString() ||
+          String(createReservationDto.eventId);
       } else {
         createReservationDto.eventId = String(createReservationDto.eventId);
       }
     }
-    
+
     return this.reservationsService.create(createReservationDto, userId);
   }
 
@@ -98,33 +105,45 @@ export class ReservationsController {
   @Get(':id/ticket')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('PARTICIPANT', 'ADMIN')
-  async downloadTicket(@Param('id') id: string, @Request() req: any, @Res() res: Response) {
+  async downloadTicket(
+    @Param('id') id: string,
+    @Request() req: any,
+    @Res() res: Response,
+  ) {
     const userId = req.user.sub;
     const userRole = req.user.role;
 
     const reservation = await this.reservationsService.findOne(id, true);
 
     if (userRole === 'PARTICIPANT') {
-      const reservationUserId = typeof reservation.userId === 'object' && reservation.userId !== null
-        ? (reservation.userId as any)._id?.toString() || (reservation.userId as any).id?.toString()
-        : String(reservation.userId);
-      
+      const reservationUserId =
+        typeof reservation.userId === 'object' && reservation.userId !== null
+          ? (reservation.userId as any)._id?.toString() ||
+            (reservation.userId as any).id?.toString()
+          : String(reservation.userId);
+
       if (reservationUserId !== userId) {
-        return res.status(403).json({ message: 'Vous n\'avez pas accès à ce ticket' });
+        return res
+          .status(403)
+          .json({ message: "Vous n'avez pas accès à ce ticket" });
       }
     }
 
     let event: any;
-    if (typeof reservation.eventId === 'object' && reservation.eventId !== null) {
+    if (
+      typeof reservation.eventId === 'object' &&
+      reservation.eventId !== null
+    ) {
       event = reservation.eventId;
     } else {
       const eventIdStr = String(reservation.eventId);
       event = await this.eventsService.findOne(eventIdStr);
     }
 
-    const userEmail = typeof reservation.userId === 'object' && reservation.userId !== null
-      ? (reservation.userId as any).email || 'Participant'
-      : 'Participant';
+    const userEmail =
+      typeof reservation.userId === 'object' && reservation.userId !== null
+        ? (reservation.userId as any).email || 'Participant'
+        : 'Participant';
 
     const pdfBuffer = await this.pdfService.generateReservationTicket(
       reservation,
@@ -133,7 +152,10 @@ export class ReservationsController {
     );
 
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="ticket-${id}.pdf"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="ticket-${id}.pdf"`,
+    );
     res.setHeader('Content-Length', pdfBuffer.length);
 
     res.send(pdfBuffer);

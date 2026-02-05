@@ -18,10 +18,10 @@ export class Reservation {
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId!: Types.ObjectId;
 
-  @Prop({ 
-    type: String, 
-    enum: ReservationStatus, 
-    default: ReservationStatus.PENDING 
+  @Prop({
+    type: String,
+    enum: ReservationStatus,
+    default: ReservationStatus.PENDING,
   })
   status!: ReservationStatus;
 }

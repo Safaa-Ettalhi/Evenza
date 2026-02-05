@@ -3,7 +3,11 @@ import { getModelToken } from '@nestjs/mongoose';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ReservationsService } from './reservations.service';
 import { EventsService } from '../events/events.service';
-import { Reservation, ReservationDocument, ReservationStatus } from './reservation.schema';
+import {
+  Reservation,
+  ReservationDocument,
+  ReservationStatus,
+} from './reservation.schema';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { EventStatus } from '../events/event.schema';
 
@@ -13,11 +17,13 @@ describe('ReservationsService', () => {
   let eventsService: jest.Mocked<EventsService>;
   let mockQueryChain: any;
 
-  const mockReservationModel: any = jest.fn(function(data: any) {
+  const mockReservationModel: any = jest.fn(function (data: any) {
     return {
       ...data,
       save: jest.fn().mockResolvedValue(data),
-      toString: jest.fn().mockReturnValue(data._id || data.eventId || data.userId),
+      toString: jest
+        .fn()
+        .mockReturnValue(data._id || data.eventId || data.userId),
     };
   });
 
@@ -30,7 +36,9 @@ describe('ReservationsService', () => {
     mockReservationModel.find = jest.fn().mockReturnValue(mockQueryChain);
     mockReservationModel.findById = jest.fn().mockReturnValue(mockQueryChain);
     mockReservationModel.findOne = jest.fn().mockReturnValue(mockQueryChain);
-    mockReservationModel.countDocuments = jest.fn().mockReturnValue(mockQueryChain);
+    mockReservationModel.countDocuments = jest
+      .fn()
+      .mockReturnValue(mockQueryChain);
     const mockEventsService = {
       findOne: jest.fn(),
     };
@@ -40,7 +48,7 @@ describe('ReservationsService', () => {
         ReservationsService,
         {
           provide: getModelToken(Reservation.name),
-          useValue: mockReservationModel as any,
+          useValue: mockReservationModel,
         },
         {
           provide: EventsService,
@@ -82,21 +90,25 @@ describe('ReservationsService', () => {
 
       eventsService.findOne.mockResolvedValue(event as any);
       mockQueryChain.exec.mockResolvedValueOnce(10).mockResolvedValueOnce(null);
-      
+
       const mockInstance = {
         ...savedReservation,
         save: jest.fn().mockResolvedValue(savedReservation),
       };
-      jest.spyOn(reservationModel, 'constructor' as any).mockImplementation(() => mockInstance);
+      jest
+        .spyOn(reservationModel, 'constructor' as any)
+        .mockImplementation(() => mockInstance);
 
       const result = await service.create(createReservationDto, userId);
 
-      expect(eventsService.findOne).toHaveBeenCalledWith(createReservationDto.eventId);
+      expect(eventsService.findOne).toHaveBeenCalledWith(
+        createReservationDto.eventId,
+      );
       expect(mockReservationModel.findOne).toHaveBeenCalled();
       expect(result.status).toBe(ReservationStatus.PENDING);
     });
 
-    it('devrait lancer une exception si l\'événement n\'est pas publié', async () => {
+    it("devrait lancer une exception si l'événement n'est pas publié", async () => {
       const createReservationDto: CreateReservationDto = {
         eventId: '507f1f77bcf86cd799439011',
       };
@@ -109,12 +121,12 @@ describe('ReservationsService', () => {
 
       eventsService.findOne.mockResolvedValue(event as any);
 
-      await expect(service.create(createReservationDto, userId)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.create(createReservationDto, userId),
+      ).rejects.toThrow(BadRequestException);
     });
 
-    it('devrait lancer une exception si l\'événement est complet', async () => {
+    it("devrait lancer une exception si l'événement est complet", async () => {
       const createReservationDto: CreateReservationDto = {
         eventId: '507f1f77bcf86cd799439011',
       };
@@ -129,9 +141,9 @@ describe('ReservationsService', () => {
       eventsService.findOne.mockResolvedValue(event as any);
       mockQueryChain.exec.mockResolvedValue(10);
 
-      await expect(service.create(createReservationDto, userId)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.create(createReservationDto, userId),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('devrait lancer une exception si une réservation existe déjà', async () => {
@@ -154,11 +166,13 @@ describe('ReservationsService', () => {
       };
 
       eventsService.findOne.mockResolvedValue(event as any);
-      mockQueryChain.exec.mockResolvedValueOnce(10).mockResolvedValueOnce(existingReservation);
+      mockQueryChain.exec
+        .mockResolvedValueOnce(10)
+        .mockResolvedValueOnce(existingReservation);
 
-      await expect(service.create(createReservationDto, userId)).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        service.create(createReservationDto, userId),
+      ).rejects.toThrow(BadRequestException);
     });
   });
 
@@ -176,7 +190,7 @@ describe('ReservationsService', () => {
         eventId: eventIdObj,
         userId: 'user_id',
         status: ReservationStatus.PENDING,
-        save: jest.fn().mockImplementation(function() {
+        save: jest.fn().mockImplementation(function () {
           this.status = ReservationStatus.CONFIRMED;
           return Promise.resolve(this);
         }),
@@ -222,7 +236,9 @@ describe('ReservationsService', () => {
         .mockResolvedValueOnce(10);
       eventsService.findOne.mockResolvedValue(event as any);
 
-      await expect(service.confirm(reservationId)).rejects.toThrow(BadRequestException);
+      await expect(service.confirm(reservationId)).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 
@@ -233,7 +249,7 @@ describe('ReservationsService', () => {
       const reservation = {
         _id: reservationId,
         status: ReservationStatus.PENDING,
-        save: jest.fn().mockImplementation(function() {
+        save: jest.fn().mockImplementation(function () {
           this.status = ReservationStatus.REFUSED;
           return Promise.resolve(this);
         }),
@@ -268,7 +284,7 @@ describe('ReservationsService', () => {
       expect(reservation.save).toHaveBeenCalled();
     });
 
-    it('devrait vérifier que l\'utilisateur peut annuler sa propre réservation', async () => {
+    it("devrait vérifier que l'utilisateur peut annuler sa propre réservation", async () => {
       const reservationId = 'reservation_id';
       const userId = 'user_id';
 
@@ -276,7 +292,7 @@ describe('ReservationsService', () => {
         _id: reservationId,
         userId,
         status: ReservationStatus.PENDING,
-        save: jest.fn().mockImplementation(function() {
+        save: jest.fn().mockImplementation(function () {
           this.status = ReservationStatus.CANCELED;
           return Promise.resolve(this);
         }),
@@ -285,10 +301,12 @@ describe('ReservationsService', () => {
 
       mockQueryChain.exec.mockResolvedValue(reservation);
 
-      await expect(service.cancel(reservationId, userId)).resolves.toBeDefined();
+      await expect(
+        service.cancel(reservationId, userId),
+      ).resolves.toBeDefined();
     });
 
-    it('devrait lancer une exception si l\'utilisateur essaie d\'annuler une autre réservation', async () => {
+    it("devrait lancer une exception si l'utilisateur essaie d'annuler une autre réservation", async () => {
       const reservationId = 'reservation_id';
       const userId = 'user_id';
       const otherUserId = 'other_user_id';

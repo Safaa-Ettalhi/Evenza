@@ -1,7 +1,15 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Reservation, ReservationDocument, ReservationStatus } from './reservation.schema';
+import {
+  Reservation,
+  ReservationDocument,
+  ReservationStatus,
+} from './reservation.schema';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { EventsService } from '../events/events.service';
 import { EventStatus } from '../events/event.schema';
@@ -9,32 +17,39 @@ import { EventStatus } from '../events/event.schema';
 @Injectable()
 export class ReservationsService {
   constructor(
-    @InjectModel(Reservation.name) private reservationModel: Model<ReservationDocument>,
+    @InjectModel(Reservation.name)
+    private reservationModel: Model<ReservationDocument>,
     private eventsService: EventsService,
   ) {}
 
-  async create(createReservationDto: CreateReservationDto, userId: string): Promise<ReservationDocument> {
-
+  async create(
+    createReservationDto: CreateReservationDto,
+    userId: string,
+  ): Promise<ReservationDocument> {
     let eventId: string = createReservationDto.eventId;
-    
+
     if (typeof eventId === 'object' && eventId !== null) {
-      eventId = (eventId as any)._id?.toString() || (eventId as any).id?.toString() || String(eventId);
+      eventId =
+        (eventId as any)._id?.toString() ||
+        (eventId as any).id?.toString() ||
+        String(eventId);
     } else if (typeof eventId === 'string' && eventId.trim().startsWith('{')) {
       try {
         const parsed = JSON.parse(eventId);
         eventId = parsed._id?.toString() || parsed.id?.toString() || eventId;
-      } catch {
-      }
+      } catch {}
     }
-    
+
     if (!eventId || eventId.length !== 24) {
-      throw new BadRequestException('ID d\'événement invalide');
+      throw new BadRequestException("ID d'événement invalide");
     }
 
     const event = await this.eventsService.findOne(eventId);
-    
+
     if (event.status !== EventStatus.PUBLISHED) {
-      throw new BadRequestException('Seuls les événements publiés peuvent être réservés');
+      throw new BadRequestException(
+        'Seuls les événements publiés peuvent être réservés',
+      );
     }
 
     const confirmedCount = await this.getConfirmedCountForEvent(eventId);
@@ -42,14 +57,20 @@ export class ReservationsService {
       throw new BadRequestException('Cet événement est complet');
     }
 
-    const existingReservation = await this.reservationModel.findOne({
-      eventId: eventId,
-      userId: userId,
-      status: { $in: [ReservationStatus.PENDING, ReservationStatus.CONFIRMED] },
-    }).exec();
+    const existingReservation = await this.reservationModel
+      .findOne({
+        eventId: eventId,
+        userId: userId,
+        status: {
+          $in: [ReservationStatus.PENDING, ReservationStatus.CONFIRMED],
+        },
+      })
+      .exec();
 
     if (existingReservation) {
-      throw new BadRequestException('Vous avez déjà une réservation pour cet événement');
+      throw new BadRequestException(
+        'Vous avez déjà une réservation pour cet événement',
+      );
     }
 
     const reservation = new this.reservationModel({
@@ -62,10 +83,12 @@ export class ReservationsService {
   }
 
   async getConfirmedCountForEvent(eventId: string): Promise<number> {
-    return this.reservationModel.countDocuments({
-      eventId,
-      status: ReservationStatus.CONFIRMED,
-    }).exec();
+    return this.reservationModel
+      .countDocuments({
+        eventId,
+        status: ReservationStatus.CONFIRMED,
+      })
+      .exec();
   }
 
   async findByUserId(userId: string): Promise<ReservationDocument[]> {
@@ -84,13 +107,16 @@ export class ReservationsService {
       .exec();
   }
 
-  async findOne(id: string, populate: boolean = true): Promise<ReservationDocument> {
+  async findOne(
+    id: string,
+    populate: boolean = true,
+  ): Promise<ReservationDocument> {
     let query = this.reservationModel.findById(id);
-    
+
     if (populate) {
       query = query.populate('eventId').populate('userId', 'email');
     }
-    
+
     const reservation = await query.exec();
 
     if (!reservation) {
@@ -107,16 +133,23 @@ export class ReservationsService {
       throw new BadRequestException('Cette réservation est déjà confirmée');
     }
 
-    if (reservation.status === ReservationStatus.CANCELED || reservation.status === ReservationStatus.REFUSED) {
-      throw new BadRequestException('Impossible de confirmer une réservation annulée ou refusée');
+    if (
+      reservation.status === ReservationStatus.CANCELED ||
+      reservation.status === ReservationStatus.REFUSED
+    ) {
+      throw new BadRequestException(
+        'Impossible de confirmer une réservation annulée ou refusée',
+      );
     }
 
     const eventId = reservation.eventId.toString();
     const event = await this.eventsService.findOne(eventId);
     const confirmedCount = await this.getConfirmedCountForEvent(eventId);
-    
+
     if (confirmedCount >= event.capacity) {
-      throw new BadRequestException('La capacité maximale de l\'événement est atteinte');
+      throw new BadRequestException(
+        "La capacité maximale de l'événement est atteinte",
+      );
     }
 
     reservation.status = ReservationStatus.CONFIRMED;
@@ -131,7 +164,9 @@ export class ReservationsService {
     }
 
     if (reservation.status === ReservationStatus.CANCELED) {
-      throw new BadRequestException('Impossible de refuser une réservation annulée');
+      throw new BadRequestException(
+        'Impossible de refuser une réservation annulée',
+      );
     }
 
     reservation.status = ReservationStatus.REFUSED;
@@ -140,9 +175,11 @@ export class ReservationsService {
 
   async cancel(id: string, userId?: string): Promise<ReservationDocument> {
     const reservation = await this.findOne(id, false);
-    
+
     if (userId && reservation.userId.toString() !== userId) {
-      throw new BadRequestException('Vous ne pouvez pas annuler cette réservation');
+      throw new BadRequestException(
+        'Vous ne pouvez pas annuler cette réservation',
+      );
     }
 
     if (reservation.status === ReservationStatus.CANCELED) {
