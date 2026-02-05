@@ -195,6 +195,25 @@ class ApiService {
   async cancelReservation(id: string, token: string): Promise<Reservation> {
     return this.requestWithAuth<Reservation>(`/reservations/${id}/cancel`, { method: 'PATCH' }, token);
   }
+
+  async downloadTicket(id: string, token: string): Promise<Blob> {
+    const url = `${API_URL}/reservations/${id}/ticket`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({
+        message: 'Une erreur est survenue',
+      }));
+      throw new Error(error.message || 'Une erreur est survenue');
+    }
+
+    return response.blob();
+  }
 }
 
 export const apiService = new ApiService();
