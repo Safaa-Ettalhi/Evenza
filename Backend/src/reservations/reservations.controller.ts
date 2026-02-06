@@ -8,6 +8,7 @@ import {
   UseGuards,
   Request,
   Res,
+  ForbiddenException,
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { ReservationsService } from './reservations.service';
@@ -17,6 +18,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { PdfService } from '../pdf/pdf.service';
 import { EventsService } from '../events/events.service';
+import { ReservationStatus } from './reservation.schema';
 
 @Controller('reservations')
 export class ReservationsController {
@@ -127,6 +129,12 @@ export class ReservationsController {
           .status(403)
           .json({ message: "Vous n'avez pas accès à ce ticket" });
       }
+    }
+
+    if (reservation.status !== ReservationStatus.CONFIRMED) {
+      throw new ForbiddenException(
+        'Le ticket ne peut être téléchargé que pour une réservation confirmée',
+      );
     }
 
     let event: any;
