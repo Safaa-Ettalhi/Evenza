@@ -28,18 +28,18 @@ export default function EditEventPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !token) return;
     setLoading(true);
     setError(null);
     apiService
-      .getEvent(id)
+      .getEventAdmin(id, token)
       .then(setEvent)
       .catch((err) => {
         setError(err instanceof Error ? err.message : 'Erreur lors du chargement de l\'événement');
         setEvent(null);
       })
       .finally(() => setLoading(false));
-  }, [id]);
+  }, [id, token]);
 
   const handleSubmit = async (data: Parameters<typeof apiService.updateEvent>[1]) => {
     if (!token) {
