@@ -1,83 +1,46 @@
-'use client';
-
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
 import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
-import { apiService, Event } from '@/lib/api';
-import { Calendar, MapPin, Users, ArrowLeft, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { apiService } from '@/lib/api';
+import { Calendar, MapPin, Users, ArrowLeft, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EventActions } from '@/components/EventActions';
+import { Metadata } from 'next';
 
-export default function EventDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-  const { isAuthenticated, token, user } = useAuth();
-  const [event, setEvent] = useState<Event | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isReserving, setIsReserving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+export const dynamic = 'force-dynamic';
 
-  const eventId = params.id as string;
+interface PageProps {
+  params: Promise<{ id: string }>;
+}
 
-  useEffect(() => {
-    async function fetchEvent() {
-      try {
-        setIsLoading(true);
-        const eventData = await apiService.getEvent(eventId);
-        setEvent(eventData);
-      } catch {
-        setError("Impossible de charger les détails de l'événement");
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    if (eventId) {
-      fetchEvent();
-    }
-  }, [eventId]);
-
-  const handleReserve = async () => {
-    if (!isAuthenticated || !token) {
-      router.push('/login');
-      return;
-    }
-
-    if (!event) return;
-
-    try {
-      setIsReserving(true);
-      setError(null);
-      setSuccess(null);
-
-      await apiService.createReservation({ eventId: typeof event._id === 'string' ? event._id : String(event._id) }, token);
-      
-      setSuccess('Votre réservation a été créée avec succès ! Elle est en attente de confirmation.');
-      
-      const updatedEvent = await apiService.getEvent(eventId);
-      setEvent(updatedEvent);
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la réservation');
-    } finally {
-      setIsReserving(false);
-    }
-  };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
-        <Header />
-        <main className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-center py-24">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 dark:border-white" />
-          </div>
-        </main>
-      </div>
-    );
+async function getEvent(id: string) {
+  try {
+    return await apiService.getEvent(id);
+  } catch (error) {
+    console.error('Failed to fetch event:', error);
+    return null;
   }
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { id } = await params;
+  const event = await getEvent(id);
+
+  if (!event) {
+    return {
+      title: 'Événement introuvable - Evenza',
+    };
+  }
+
+  return {
+    title: `${event.title} - Evenza`,
+    description: event.description.substring(0, 160),
+  };
+}
+
+export default async function EventDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  const event = await getEvent(id);
 
   if (!event) {
     return (
@@ -87,7 +50,7 @@ export default function EventDetailPage() {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              {error || 'Événement introuvable'}
+              Impossible de charger les détails de l'événement ou événement introuvable.
             </AlertDescription>
           </Alert>
           <div className="mt-6">
@@ -106,8 +69,6 @@ export default function EventDetailPage() {
   const eventDate = new Date(event.date);
   const availableSpots = event.availableSpots ?? event.capacity;
   const isFull = availableSpots === 0;
-  const isPublished = event.status === 'PUBLISHED';
-  const canReserve = isAuthenticated && isPublished && !isFull && user?.role === 'PARTICIPANT';
 
   return (
     <div className="min-h-screen bg-white dark:bg-[#0a0a0a]">
@@ -122,22 +83,6 @@ export default function EventDetailPage() {
           </Button>
         </div>
 
-        {error && (
-          <Alert variant="destructive" className="mb-6">
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>{error}</AlertDescription>
-          </Alert>
-        )}
-
-        {success && (
-          <Alert className="mb-6 border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
-            <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-            <AlertDescription className="text-green-800 dark:text-green-200">
-              {success}
-            </AlertDescription>
-          </Alert>
-        )}
-
         <div className="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800 rounded-lg shadow-lg overflow-hidden">
           <div className="p-8">
             <div className="mb-6 flex items-start justify-between">
@@ -147,25 +92,27 @@ export default function EventDetailPage() {
                 </h1>
                 <div className="flex flex-wrap gap-2 mb-4">
                   <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      isFull
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${isFull
                         ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                         : 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
-                    }`}
+                      }`}
                   >
                     {isFull ? 'Complet' : `${availableSpots} places disponibles`}
                   </span>
                   {event.status && (
                     <span
-                      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        event.status === 'PUBLISHED'
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${event.status === 'PUBLISHED'
                           ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
                           : event.status === 'CANCELED'
-                          ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                          : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-                      }`}
+                            ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                            : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                        }`}
                     >
-                      {event.status === 'PUBLISHED' ? 'Publié' : event.status === 'CANCELED' ? 'Annulé' : 'Brouillon'}
+                      {event.status === 'PUBLISHED'
+                        ? 'Publié'
+                        : event.status === 'CANCELED'
+                          ? 'Annulé'
+                          : 'Brouillon'}
                     </span>
                   )}
                 </div>
@@ -240,44 +187,8 @@ export default function EventDetailPage() {
                 </div>
               </div>
             </div>
+            <EventActions event={event} />
 
-            {canReserve && (
-              <div className="pt-6 border-t border-gray-200 dark:border-gray-800">
-                <Button
-                  onClick={handleReserve}
-                  disabled={isReserving || isFull || !isPublished}
-                  className="w-full md:w-auto bg-gray-900 text-white hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100"
-                  size="lg"
-                >
-                  {isReserving ? 'Réservation en cours...' : 'Réserver ma place'}
-                </Button>
-              </div>
-            )}
-
-            {!isAuthenticated && isPublished && !isFull && (
-              <div className="pt-6 border-t border-gray-200 dark:border-gray-800">
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Vous devez être connecté pour réserver.{' '}
-                    <Link href="/login" className="underline font-medium">
-                      Se connecter
-                    </Link>
-                  </AlertDescription>
-                </Alert>
-              </div>
-            )}
-
-            {isAuthenticated && user?.role !== 'PARTICIPANT' && (
-              <div className="pt-6 border-t border-gray-200 dark:border-gray-800">
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Seuls les participants peuvent réserver des événements.
-                  </AlertDescription>
-                </Alert>
-              </div>
-            )}
           </div>
         </div>
       </main>
