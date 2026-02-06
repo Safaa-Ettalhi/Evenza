@@ -78,6 +78,16 @@ export class EventsService {
     return this.addAvailableSpots(event);
   }
 
+  async findOnePublished(id: string): Promise<EventDocument & { availableSpots: number }> {
+    const event = await this.eventModel
+      .findOne({ _id: id, status: EventStatus.PUBLISHED })
+      .exec();
+    if (!event) {
+      throw new CustomNotFoundException('Événement non trouvé');
+    }
+    return this.addAvailableSpots(event);
+  }
+
   async update(
     id: string,
     updateEventDto: UpdateEventDto,
