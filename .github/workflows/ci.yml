@@ -105,7 +105,7 @@ jobs:
       - name: Build and push Backend
         uses: docker/build-push-action@v6
         with:
-          context: ./backend
+          context: ./Backend
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/evenza-backend:latest,${{ secrets.DOCKER_USERNAME }}/evenza-backend:${{ github.sha }}
 
