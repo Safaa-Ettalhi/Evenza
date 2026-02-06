@@ -159,6 +159,10 @@ class ApiService {
     return this.requestWithAuth<Event[]>('/events/admin/all', { method: 'GET' }, token);
   }
 
+  async getEventAdmin(id: string, token: string): Promise<Event> {
+    return this.requestWithAuth<Event>(`/events/admin/${id}`, { method: 'GET' }, token);
+  }
+
   async getEvent(id: string): Promise<Event> {
     return this.request<Event>(`/events/${id}`, { method: 'GET' });
   }
