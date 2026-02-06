@@ -42,9 +42,16 @@ export class EventsController {
     return this.eventsService.findAll();
   }
 
+  @Get('admin/:id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  findOneAdmin(@Param('id') id: string) {
+    return this.eventsService.findOne(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.eventsService.findOne(id);
+    return this.eventsService.findOnePublished(id);
   }
 
   @Patch(':id')
