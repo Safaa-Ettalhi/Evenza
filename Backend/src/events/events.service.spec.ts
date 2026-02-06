@@ -1,11 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { EventsService } from './events.service';
-import { Event, EventDocument, EventStatus } from './event.schema';
+import { Event, EventStatus } from './event.schema';
 import { CreateEventDto } from './dto/create-event.dto';
 import { UpdateEventDto } from './dto/update-event.dto';
 import { CustomNotFoundException } from '../common/exceptions/not-found.exception';
+import { Reservation } from '../reservations/reservation.schema';
 
 describe('EventsService', () => {
   let service: EventsService;
@@ -15,6 +15,10 @@ describe('EventsService', () => {
   const mockEventModel: any = jest.fn(function (data: any) {
     mockInstance = {
       _id: 'event_id',
+      capacity: data?.capacity ?? 50,
+      toObject: jest.fn().mockImplementation(function (this: any) {
+        return { _id: this._id, capacity: this.capacity, ...data };
+      }),
       ...data,
       save: jest.fn().mockImplementation(function () {
         return Promise.resolve(this);
@@ -29,13 +33,24 @@ describe('EventsService', () => {
   mockEventModel.sort = jest.fn().mockReturnThis();
   mockEventModel.exec = jest.fn();
 
+  const mockReservationModel = {
+    countDocuments: jest.fn().mockReturnThis(),
+    exec: jest.fn().mockResolvedValue(0),
+  };
+
   beforeEach(async () => {
+    mockReservationModel.exec.mockResolvedValue(0);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EventsService,
         {
           provide: getModelToken(Event.name),
           useValue: mockEventModel,
+        },
+        {
+          provide: getModelToken(Reservation.name),
+          useValue: mockReservationModel,
         },
       ],
     }).compile();
@@ -84,10 +99,10 @@ describe('EventsService', () => {
   });
 
   describe('findAll', () => {
-    it('devrait retourner tous les événements triés par date', async () => {
+    it('devrait retourner tous les événements triés par date avec availableSpots', async () => {
       const events = [
-        { _id: '1', title: 'Event 1', date: new Date('2026-01-01') },
-        { _id: '2', title: 'Event 2', date: new Date('2026-01-02') },
+        { _id: '1', title: 'Event 1', date: new Date('2026-01-01'), capacity: 50 },
+        { _id: '2', title: 'Event 2', date: new Date('2026-01-02'), capacity: 30 },
       ];
 
       mockEventModel.exec.mockResolvedValue(events);
@@ -96,12 +111,15 @@ describe('EventsService', () => {
 
       expect(mockEventModel.find).toHaveBeenCalledWith({});
       expect(mockEventModel.sort).toHaveBeenCalledWith({ date: 1 });
-      expect(result).toEqual(events);
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({ _id: '1', title: 'Event 1' });
+      expect(result[0].availableSpots).toBe(50);
+      expect(result[1].availableSpots).toBe(30);
     });
 
     it('devrait filtrer par statut si fourni', async () => {
       const events = [
-        { _id: '1', title: 'Event 1', status: EventStatus.PUBLISHED },
+        { _id: '1', title: 'Event 1', status: EventStatus.PUBLISHED, capacity: 50 },
       ];
 
       mockEventModel.exec.mockResolvedValue(events);
@@ -111,14 +129,15 @@ describe('EventsService', () => {
       expect(mockEventModel.find).toHaveBeenCalledWith({
         status: EventStatus.PUBLISHED,
       });
-      expect(result).toEqual(events);
+      expect(result[0]).toMatchObject({ _id: '1', title: 'Event 1' });
+      expect(result[0].availableSpots).toBe(50);
     });
   });
 
   describe('findPublished', () => {
-    it('devrait retourner uniquement les événements publiés', async () => {
+    it('devrait retourner uniquement les événements publiés avec availableSpots', async () => {
       const events = [
-        { _id: '1', title: 'Event 1', status: EventStatus.PUBLISHED },
+        { _id: '1', title: 'Event 1', status: EventStatus.PUBLISHED, capacity: 50 },
       ];
 
       mockEventModel.exec.mockResolvedValue(events);
@@ -129,20 +148,22 @@ describe('EventsService', () => {
         status: EventStatus.PUBLISHED,
       });
       expect(mockEventModel.sort).toHaveBeenCalledWith({ date: 1 });
-      expect(result).toEqual(events);
+      expect(result[0]).toMatchObject({ _id: '1', title: 'Event 1' });
+      expect(result[0].availableSpots).toBe(50);
     });
   });
 
   describe('findOne', () => {
-    it('devrait retourner un événement par ID', async () => {
-      const event = { _id: 'event_id', title: 'Test Event' };
+    it('devrait retourner un événement par ID avec availableSpots', async () => {
+      const event = { _id: 'event_id', title: 'Test Event', capacity: 50 };
 
       mockEventModel.exec.mockResolvedValue(event);
 
       const result = await service.findOne('event_id');
 
       expect(mockEventModel.findById).toHaveBeenCalledWith('event_id');
-      expect(result).toEqual(event);
+      expect(result).toMatchObject({ _id: 'event_id', title: 'Test Event' });
+      expect(result.availableSpots).toBe(50);
     });
 
     it("devrait lancer une exception si l'événement n'existe pas", async () => {
@@ -164,6 +185,13 @@ describe('EventsService', () => {
         _id: 'event_id',
         title: 'Updated Title',
         description: 'Test Description',
+        capacity: 50,
+        toObject: jest.fn().mockReturnValue({
+          _id: 'event_id',
+          title: 'Updated Title',
+          description: 'Test Description',
+          capacity: 50,
+        }),
       };
 
       mockEventModel.exec.mockResolvedValue(updatedEvent);
@@ -172,10 +200,11 @@ describe('EventsService', () => {
 
       expect(mockEventModel.findByIdAndUpdate).toHaveBeenCalledWith(
         'event_id',
-        updateDto,
+        expect.objectContaining({ title: 'Updated Title' }),
         { new: true },
       );
-      expect(result).toEqual(updatedEvent);
+      expect(result).toMatchObject({ title: 'Updated Title' });
+      expect(result.availableSpots).toBe(50);
     });
 
     it('devrait convertir la date en objet Date si fournie', async () => {
@@ -183,7 +212,16 @@ describe('EventsService', () => {
         date: '2026-12-31T12:00:00',
       };
 
-      const updatedEvent = { _id: 'event_id', date: new Date(updateDto.date) };
+      const updatedEvent = {
+        _id: 'event_id',
+        date: new Date(updateDto.date),
+        capacity: 50,
+        toObject: jest.fn().mockReturnValue({
+          _id: 'event_id',
+          date: new Date(updateDto.date),
+          capacity: 50,
+        }),
+      };
 
       mockEventModel.exec.mockResolvedValue(updatedEvent);
 
@@ -191,7 +229,7 @@ describe('EventsService', () => {
 
       expect(mockEventModel.findByIdAndUpdate).toHaveBeenCalledWith(
         'event_id',
-        { date: new Date(updateDto.date) },
+        expect.objectContaining({ date: new Date(updateDto.date) }),
         { new: true },
       );
     });
@@ -213,6 +251,13 @@ describe('EventsService', () => {
         _id: 'event_id',
         title: 'Test Event',
         status: EventStatus.PUBLISHED,
+        capacity: 50,
+        toObject: jest.fn().mockReturnValue({
+          _id: 'event_id',
+          title: 'Test Event',
+          status: EventStatus.PUBLISHED,
+          capacity: 50,
+        }),
       };
 
       mockEventModel.exec.mockResolvedValue(publishedEvent);
@@ -225,6 +270,7 @@ describe('EventsService', () => {
         { new: true },
       );
       expect(result.status).toBe(EventStatus.PUBLISHED);
+      expect(result.availableSpots).toBe(50);
     });
 
     it("devrait lancer une exception si l'événement n'existe pas", async () => {
@@ -242,6 +288,13 @@ describe('EventsService', () => {
         _id: 'event_id',
         title: 'Test Event',
         status: EventStatus.CANCELED,
+        capacity: 50,
+        toObject: jest.fn().mockReturnValue({
+          _id: 'event_id',
+          title: 'Test Event',
+          status: EventStatus.CANCELED,
+          capacity: 50,
+        }),
       };
 
       mockEventModel.exec.mockResolvedValue(canceledEvent);
@@ -254,6 +307,7 @@ describe('EventsService', () => {
         { new: true },
       );
       expect(result.status).toBe(EventStatus.CANCELED);
+      expect(result.availableSpots).toBe(50);
     });
 
     it("devrait lancer une exception si l'événement n'existe pas", async () => {
