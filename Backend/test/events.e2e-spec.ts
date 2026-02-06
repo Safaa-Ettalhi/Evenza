@@ -171,7 +171,7 @@ describe('EventsController (e2e)', () => {
   });
 
   describe('GET /events/:id', () => {
-    it('devrait retourner un événement par ID', async () => {
+    it('devrait retourner un événement publié par ID (public)', async () => {
       if (!createdEventId) {
         const createResponse = await request(app.getHttpServer())
           .post('/events')
@@ -186,11 +186,59 @@ describe('EventsController (e2e)', () => {
         createdEventId = createResponse.body._id;
       }
 
+      await request(app.getHttpServer())
+        .patch(`/events/${createdEventId}/publish`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
       const response = await request(app.getHttpServer())
         .get(`/events/${createdEventId}`)
         .expect(200);
 
       expect(response.body).toHaveProperty('_id', createdEventId);
+      expect(response.body.status).toBe('PUBLISHED');
+    });
+
+    it('devrait retourner 404 pour un événement DRAFT (non visible publiquement)', async () => {
+      const draftResponse = await request(app.getHttpServer())
+        .post('/events')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          title: 'Event Brouillon',
+          description: 'Description',
+          date: '2026-12-31T14:00:00',
+          location: 'Salle',
+          capacity: 50,
+        })
+        .expect(201);
+      const draftId = draftResponse.body._id;
+
+      await request(app.getHttpServer())
+        .get(`/events/${draftId}`)
+        .expect(404);
+    });
+
+    it("devrait permettre à l'admin de récupérer un événement DRAFT via /events/admin/:id", async () => {
+      const draftResponse = await request(app.getHttpServer())
+        .post('/events')
+        .set('Authorization', `Bearer ${adminToken}`)
+        .send({
+          title: 'Event Brouillon Admin',
+          description: 'Description',
+          date: '2026-12-31T14:00:00',
+          location: 'Salle',
+          capacity: 50,
+        })
+        .expect(201);
+      const draftId = draftResponse.body._id;
+
+      const response = await request(app.getHttpServer())
+        .get(`/events/admin/${draftId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(200);
+
+      expect(response.body).toHaveProperty('_id', draftId);
+      expect(response.body.status).toBe('DRAFT');
     });
 
     it("devrait retourner 404 si l'événement n'existe pas", async () => {
@@ -302,7 +350,8 @@ describe('EventsController (e2e)', () => {
       const eventId = createResponse.body._id;
 
       const getResponse = await request(app.getHttpServer())
-        .get(`/events/${eventId}`)
+        .get(`/events/admin/${eventId}`)
+        .set('Authorization', `Bearer ${adminToken}`)
         .expect(200);
 
       expect(getResponse.body.title).toBe(createDto.title);
@@ -321,6 +370,11 @@ describe('EventsController (e2e)', () => {
         .expect(200);
 
       expect(publishResponse.body.status).toBe('PUBLISHED');
+
+      const getPublishedResponse = await request(app.getHttpServer())
+        .get(`/events/${eventId}`)
+        .expect(200);
+      expect(getPublishedResponse.body.status).toBe('PUBLISHED');
 
       const cancelResponse = await request(app.getHttpServer())
         .patch(`/events/${eventId}/cancel`)
