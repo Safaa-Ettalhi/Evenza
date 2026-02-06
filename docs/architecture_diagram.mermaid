@@ -1,0 +1,60 @@
+classDiagram
+    class User {
+        +ObjectId _id
+        +String email
+        +String password
+        +String role
+        +Date createdAt
+    }
+
+    class Event {
+        +ObjectId _id
+        +String title
+        +String description
+        +Date date
+        +String location
+        +Number capacity
+        +Number availableSpots
+        +String status
+        +ObjectId createdBy
+        +Date createdAt
+    }
+
+    class Reservation {
+        +ObjectId _id
+        +ObjectId eventId
+        +ObjectId userId
+        +String status
+        +Date createdAt
+    }
+
+    %% Relations
+    User "1" -- "*" Event : Creates (Admin)
+    User "1" -- "*" Reservation : Makes
+    Event "1" -- "*" Reservation : Has
+
+    %% Enums
+    class Role {
+        <<enumeration>>
+        ADMIN
+        PARTICIPANT
+    }
+
+    class EventStatus {
+        <<enumeration>>
+        DRAFT
+        PUBLISHED
+        CANCELED
+    }
+
+    class ReservationStatus {
+        <<enumeration>>
+        PENDING
+        CONFIRMED
+        REFUSED
+        CANCELED
+    }
+
+    User ..> Role
+    Event ..> EventStatus
+    Reservation ..> ReservationStatus
