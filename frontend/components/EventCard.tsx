@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Event } from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,14 @@ export function EventCard({ event }: EventCardProps) {
   const eventDate = new Date(event.date);
   const availableSpots = event.availableSpots ?? event.capacity;
   const isFull = availableSpots === 0;
-  const isSoon = new Date(event.date).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000; // Dans les 7 prochains jours
+  const [isSoon, setIsSoon] = useState(false);
+
+  useEffect(() => {
+    const timer = requestAnimationFrame(() => {
+      setIsSoon(new Date(event.date).getTime() - Date.now() < 7 * 24 * 60 * 60 * 1000);
+    });
+    return () => cancelAnimationFrame(timer);
+  }, [event.date]);
 
   return (
     <Card className="group relative flex flex-col overflow-hidden border border-gray-200 bg-white transition-all duration-300 hover:shadow-lg dark:border-gray-800 dark:bg-[#141414]">

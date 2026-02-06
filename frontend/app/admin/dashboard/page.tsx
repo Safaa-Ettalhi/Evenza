@@ -258,7 +258,7 @@ export default function AdminDashboardPage() {
               Statistiques
             </CardTitle>
             <CardDescription>
-              Vue d'ensemble des indicateurs clés.
+              Vue d&apos;ensemble des indicateurs clés.
             </CardDescription>
           </CardHeader>
           <CardContent>

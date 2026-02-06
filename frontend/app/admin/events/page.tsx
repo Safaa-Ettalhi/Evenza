@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { apiService, Event } from '@/lib/api';
@@ -19,7 +19,7 @@ export default function AdminEventsPage() {
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
 
-  const loadEvents = async () => {
+  const loadEvents = useCallback(async () => {
     if (!token) return;
     try {
       const data = await apiService.getEventsAdmin(token);
@@ -29,11 +29,11 @@ export default function AdminEventsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
   useEffect(() => {
     loadEvents();
-  }, [token]);
+  }, [loadEvents]);
 
   const handlePublish = async (id: string) => {
     if (!token) return;

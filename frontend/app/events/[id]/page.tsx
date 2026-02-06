@@ -28,8 +28,8 @@ export default function EventDetailPage() {
         setIsLoading(true);
         const eventData = await apiService.getEvent(eventId);
         setEvent(eventData);
-      } catch (err) {
-        setError('Impossible de charger les détails de l\'événement');
+      } catch {
+        setError("Impossible de charger les détails de l'événement");
       } finally {
         setIsLoading(false);
       }
@@ -59,8 +59,8 @@ export default function EventDetailPage() {
       
       const updatedEvent = await apiService.getEvent(eventId);
       setEvent(updatedEvent);
-    } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue lors de la réservation');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue lors de la réservation');
     } finally {
       setIsReserving(false);
     }
@@ -94,7 +94,7 @@ export default function EventDetailPage() {
             <Button asChild variant="outline">
               <Link href="/">
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Retour à l'accueil
+                Retour à l&apos;accueil
               </Link>
             </Button>
           </div>

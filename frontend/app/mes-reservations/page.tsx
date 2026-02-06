@@ -5,7 +5,7 @@ import { Header } from '@/components/Header';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { apiService, Reservation, Event } from '@/lib/api';
-import { Ticket, Calendar, MapPin, X, AlertCircle, CheckCircle2, Clock, Ban, Download, Eye, FileText } from 'lucide-react';
+import { Ticket, Calendar, MapPin, X, AlertCircle, CheckCircle2, Clock, Ban, Download, Eye } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -45,7 +45,7 @@ export default function MesReservationsPage() {
         return;
       }
       if (!token.trim()) {
-        setError('Token d\'authentification invalide. Veuillez vous reconnecter.');
+        setError("Token d'authentification invalide. Veuillez vous reconnecter.");
         setIsLoadingReservations(false);
         setTimeout(() => {
           router.push('/login');
@@ -58,8 +58,8 @@ export default function MesReservationsPage() {
         setError(null);
         const data = await apiService.getMyReservations(token);
         setReservations(data);
-      } catch (err: any) {
-        const errorMessage = err.message || 'Impossible de charger vos réservations';
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Impossible de charger vos réservations';
         setError(errorMessage);
         
         if (errorMessage.toLowerCase().includes('unauthorized') || 
@@ -99,8 +99,8 @@ export default function MesReservationsPage() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors du téléchargement du ticket');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du téléchargement du ticket');
     } finally {
       setDownloadingId(null);
     }
@@ -121,8 +121,8 @@ export default function MesReservationsPage() {
       
       const data = await apiService.getMyReservations(token);
       setReservations(data);
-    } catch (err: any) {
-      setError(err.message || 'Une erreur est survenue lors de l\'annulation');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Une erreur est survenue lors de l'annulation");
     } finally {
       setCancelingId(null);
     }
@@ -306,7 +306,7 @@ export default function MesReservationsPage() {
                               Réservation confirmée
                             </p>
                             <p className="text-xs text-green-700 dark:text-green-400 mt-1">
-                              Votre ticket est disponible. Téléchargez-le pour l'événement.
+                              Votre ticket est disponible. Téléchargez-le pour l&apos;événement.
                             </p>
                           </div>
                         </div>
@@ -321,7 +321,7 @@ export default function MesReservationsPage() {
                               En attente de confirmation
                             </p>
                             <p className="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
-                              Votre réservation est en cours de traitement par l'administrateur.
+                              Votre réservation est en cours de traitement par l&apos;administrateur.
                             </p>
                           </div>
                         </div>
@@ -336,7 +336,7 @@ export default function MesReservationsPage() {
                               Réservation refusée
                             </p>
                             <p className="text-xs text-red-700 dark:text-red-400 mt-1">
-                              Votre réservation a été refusée. Contactez l'administrateur pour plus d'informations.
+                              Votre réservation a été refusée. Contactez l&apos;administrateur pour plus d&apos;informations.
                             </p>
                           </div>
                         </div>
@@ -386,7 +386,7 @@ export default function MesReservationsPage() {
                           {confirmCancelId === reservation._id ? (
                             <div className="flex flex-col gap-2 p-3 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-lg">
                               <p className="text-sm font-medium text-red-800 dark:text-red-300 mb-1">
-                                Confirmer l'annulation ?
+                                Confirmer l&apos;annulation ?
                               </p>
                               <div className="flex gap-2">
                                 <Button
@@ -404,7 +404,7 @@ export default function MesReservationsPage() {
                                   ) : (
                                     <>
                                       <Ban className="h-4 w-4 mr-2" />
-                                      Confirmer l'annulation
+                                      Confirmer l&apos;annulation
                                     </>
                                   )}
                                 </Button>

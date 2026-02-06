@@ -53,8 +53,8 @@ export default function AdminReservationsPage() {
         setError(null);
         const data = await apiService.getAllReservations(token);
         setReservations(data);
-      } catch (err: any) {
-        setError(err.message || 'Impossible de charger les réservations');
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Impossible de charger les réservations');
       } finally {
         setIsLoadingReservations(false);
       }
@@ -75,8 +75,8 @@ export default function AdminReservationsPage() {
       setSuccess('Réservation confirmée avec succès');
       const data = await apiService.getAllReservations(token);
       setReservations(data);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de la confirmation');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur lors de la confirmation');
     } finally {
       setProcessingId(null);
     }
@@ -93,8 +93,8 @@ export default function AdminReservationsPage() {
       setSuccess('Réservation refusée');
       const data = await apiService.getAllReservations(token);
       setReservations(data);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors du refus');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erreur lors du refus');
     } finally {
       setProcessingId(null);
     }
@@ -111,8 +111,8 @@ export default function AdminReservationsPage() {
       setSuccess('Réservation annulée');
       const data = await apiService.getAllReservations(token);
       setReservations(data);
-    } catch (err: any) {
-      setError(err.message || 'Erreur lors de l\'annulation');
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erreur lors de l'annulation");
     } finally {
       setProcessingId(null);
     }
@@ -250,8 +250,8 @@ export default function AdminReservationsPage() {
 
               const eventDate = new Date(event.date);
               const reservationDate = reservation.createdAt ? new Date(reservation.createdAt) : null;
-              const userEmail = typeof reservation.userId === 'object' && reservation.userId !== null
-                ? (reservation.userId as any).email
+              const userEmail = typeof reservation.userId === 'object' && reservation.userId !== null && 'email' in reservation.userId
+                ? (reservation.userId as { email?: string }).email ?? 'Utilisateur'
                 : 'Utilisateur';
 
               return (

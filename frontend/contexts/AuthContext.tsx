@@ -41,28 +41,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    setIsMounted(true);
-    if (typeof window === 'undefined') {
-      setIsLoading(false);
-      return;
-    }
-    const stored = localStorage.getItem('token');
-    if (stored) {
-      if (!stored.includes('.') || stored.split('.').length !== 3) {
-        localStorage.removeItem('token');
+    queueMicrotask(() => {
+      setIsMounted(true);
+      if (typeof window === 'undefined') {
         setIsLoading(false);
         return;
       }
-      
-      const u = parseTokenToUser(stored);
-      if (u) {
-        setToken(stored);
-        setUser(u);
-      } else {
-        localStorage.removeItem('token');
+      const stored = localStorage.getItem('token');
+      if (stored) {
+        if (!stored.includes('.') || stored.split('.').length !== 3) {
+          localStorage.removeItem('token');
+          setIsLoading(false);
+          return;
+        }
+
+        const u = parseTokenToUser(stored);
+        if (u) {
+          setToken(stored);
+          setUser(u);
+        } else {
+          localStorage.removeItem('token');
+        }
       }
-    }
-    setIsLoading(false);
+      setIsLoading(false);
+    });
   }, []);
 
   const login = useCallback(async (email: string, password: string): Promise<User> => {

@@ -1,6 +1,4 @@
-import Link from 'next/link';
 import { Event, API_URL } from '@/lib/api';
-import { Button } from '@/components/ui/button';
 import { EventCard } from '@/components/EventCard';
 import { Header } from '@/components/Header';
 import { Calendar } from 'lucide-react';

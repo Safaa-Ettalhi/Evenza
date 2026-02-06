@@ -115,10 +115,10 @@ export default function EditEventPage() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Modifier l'événement
+            Modifier l&apos;événement
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Modifiez les informations de l'événement ci-dessous. Les changements seront enregistrés immédiatement.
+            Modifiez les informations de l&apos;événement ci-dessous. Les changements seront enregistrés immédiatement.
           </p>
         </div>
 
@@ -140,7 +140,7 @@ export default function EditEventPage() {
 
         <Card className="bg-white dark:bg-[#141414] border border-gray-200 dark:border-gray-800">
           <CardHeader>
-            <CardTitle>Informations de l'événement</CardTitle>
+            <CardTitle>Informations de l&apos;événement</CardTitle>
             <CardDescription>
               Modifiez les champs nécessaires. Tous les champs sont obligatoires.
             </CardDescription>

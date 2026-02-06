@@ -35,7 +35,7 @@ export function PublicHomePage({ events }: PublicHomePageProps) {
             </h1>
             <p className="mb-8 text-lg text-gray-600 dark:text-gray-400 md:text-xl">
               Réservez votre place pour des formations, ateliers, conférences et bien plus encore.
-              Rejoignez une communauté passionnée d'apprenants.
+              Rejoignez une communauté passionnée d&apos;apprenants.
             </p>
             <div className="flex flex-col items-start justify-start gap-4 sm:flex-row">
               <Button size="lg" className="group bg-gray-900 text-white text-lg px-8 py-6 hover:bg-gray-800 dark:bg-white dark:text-gray-900 dark:hover:bg-gray-100" asChild>
@@ -110,7 +110,7 @@ export function PublicHomePage({ events }: PublicHomePageProps) {
                 Événements à venir
               </h2>
               <p className="mx-auto max-w-2xl text-lg text-gray-600 dark:text-gray-400">
-                Ne manquez pas ces opportunités exceptionnelles d'apprentissage et de networking
+                Ne manquez pas ces opportunités exceptionnelles d&apos;apprentissage et de networking
               </p>
             </div>
             <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
@@ -157,7 +157,7 @@ export function PublicHomePage({ events }: PublicHomePageProps) {
                   Tous les événements
                 </h2>
                 <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Explorez notre catalogue complet d'événements
+                  Explorez notre catalogue complet d&apos;événements
                 </p>
               </div>
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -204,7 +204,7 @@ export function PublicHomePage({ events }: PublicHomePageProps) {
                 Evenza
               </Link>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                La plateforme de réservation d'événements pour tous vos besoins de formation et de networking.
+                La plateforme de réservation d&apos;événements pour tous vos besoins de formation et de networking.
               </p>
             </div>
             <div>
@@ -262,7 +262,7 @@ export function PublicHomePage({ events }: PublicHomePageProps) {
                 </li>
                 <li>
                   <Link href="#" className="hover:text-gray-900 dark:hover:text-white">
-                    Conditions d'utilisation
+                    Conditions d&apos;utilisation
                   </Link>
                 </li>
               </ul>

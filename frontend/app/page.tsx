@@ -30,7 +30,7 @@ export default function HomePage() {
     if (!isAuthenticated) {
       getEvents().then(setEvents).finally(() => setEventsLoading(false));
     } else {
-      setEventsLoading(false);
+      queueMicrotask(() => setEventsLoading(false));
     }
   }, [isAuthenticated]);
 
