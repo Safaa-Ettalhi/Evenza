@@ -50,7 +50,7 @@ export default async function EventDetailPage({ params }: PageProps) {
           <Alert variant="destructive">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              Impossible de charger les détails de l'événement ou événement introuvable.
+              Impossible de charger les détails de l&apos;événement ou événement introuvable.
             </AlertDescription>
           </Alert>
           <div className="mt-6">
@@ -93,8 +93,8 @@ export default async function EventDetailPage({ params }: PageProps) {
                 <div className="flex flex-wrap gap-2 mb-4">
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${isFull
-                        ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
-                        : 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
+                      ? 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                      : 'bg-gray-900 text-white dark:bg-white dark:text-gray-900'
                       }`}
                   >
                     {isFull ? 'Complet' : `${availableSpots} places disponibles`}
@@ -102,10 +102,10 @@ export default async function EventDetailPage({ params }: PageProps) {
                   {event.status && (
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${event.status === 'PUBLISHED'
-                          ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
-                          : event.status === 'CANCELED'
-                            ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-                            : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300'
+                        : event.status === 'CANCELED'
+                          ? 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
+                          : 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300'
                         }`}
                     >
                       {event.status === 'PUBLISHED'
