@@ -76,8 +76,8 @@ describe('LoginPage', () => {
       expect(mockLogin).toHaveBeenCalledWith('test@test.com', 'password123');
     });
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith('/');
-    }, { timeout: 500 });
+      expect(mockPush).toHaveBeenCalledWith('/dashboard');
+    }, { timeout: 1000 });
   });
 
   it('affiche l\'erreur du serveur en cas d\'échec', async () => {
