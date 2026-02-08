@@ -10,6 +10,12 @@ jest.mock('@/lib/api', () => ({
   },
 }));
 
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
 const mockApi = apiService as jest.Mocked<typeof apiService>;
 
 function TestConsumer() {
