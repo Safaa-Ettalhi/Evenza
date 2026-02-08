@@ -2,20 +2,21 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { apiService, User } from '@/lib/api';
+import { useRouter } from 'next/navigation';
 
 function parseTokenToUser(token: string): User | null {
   try {
- const parts = token.split('.');
+    const parts = token.split('.');
     if (parts.length !== 3) {
       return null;
     }
-    
+
     const payload = JSON.parse(atob(parts[1]));
-    
+
     if (!payload.sub || !payload.email || !payload.role) {
       return null;
     }
-    
+
     return { userId: payload.sub, email: payload.email, role: payload.role };
   } catch {
     return null;
@@ -39,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     queueMicrotask(() => {
@@ -86,7 +88,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') localStorage.removeItem('token');
     setToken(null);
     setUser(null);
-  }, []);
+    router.push('/');
+  }, [router]);
 
   return (
     <AuthContext.Provider

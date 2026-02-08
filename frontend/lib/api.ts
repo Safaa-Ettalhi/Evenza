@@ -87,10 +87,11 @@ class ApiService {
     options: RequestInit = {}
   ): Promise<T> {
     const url = `${API_URL}${endpoint}`;
-    
+
     try {
       const response = await fetch(url, {
         ...options,
+        cache: 'no-store',
         headers: {
           'Content-Type': 'application/json',
           ...options.headers,
@@ -131,13 +132,13 @@ class ApiService {
     if (!token || token.trim() === '') {
       throw new Error('Token d\'authentification manquant');
     }
-    
+
     const trimmedToken = token.trim();
-    
+
     if (!trimmedToken.includes('.') || trimmedToken.split('.').length !== 3) {
       throw new Error('Format de token invalide. Veuillez vous reconnecter.');
     }
-    
+
     return this.request<T>(endpoint, {
       ...options,
       headers: {

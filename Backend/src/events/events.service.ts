@@ -17,7 +17,7 @@ export class EventsService {
     @InjectModel(Event.name) private eventModel: Model<EventDocument>,
     @InjectModel(Reservation.name)
     private reservationModel: Model<ReservationDocument>,
-  ) {}
+  ) { }
 
   async create(
     createEventDto: CreateEventDto,
@@ -116,9 +116,11 @@ export class EventsService {
   }
 
   async cancel(id: string): Promise<EventDocument & { availableSpots: number }> {
+    console.log(`[EventsService] Cancelling event ${id}`);
     const event = await this.eventModel
       .findByIdAndUpdate(id, { status: EventStatus.CANCELED }, { new: true })
       .exec();
+    console.log(`[EventsService] Event cancelled execution result:`, event);
     if (!event) {
       throw new CustomNotFoundException('Événement non trouvé');
     }

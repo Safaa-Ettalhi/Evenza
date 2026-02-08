@@ -152,19 +152,28 @@ export function PublicHomePage({ events }: PublicHomePageProps) {
             </div>
           ) : (
             <>
-              <div className="mb-12">
+              <div className="mb-12 text-center">
                 <h2 className="mb-4 text-4xl font-bold text-gray-900 dark:text-white md:text-5xl">
-                  Tous les événements
+                  Découvrez nos événements
                 </h2>
-                <p className="text-lg text-gray-600 dark:text-gray-400">
-                  Explorez notre catalogue complet d&apos;événements
+                <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                  Une sélection de nos meilleurs événements à venir.
                 </p>
               </div>
-              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {events.map((event) => (
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
+                {events.slice(0, 6).map((event) => (
                   <EventCard key={event._id} event={event} />
                 ))}
               </div>
+              {events.length > 6 && (
+                <div className="text-center">
+                  <Button size="lg" variant="outline" className="border-2 border-gray-900 dark:border-white px-8" asChild>
+                    <Link href="/catalogue">
+                      Voir tout le catalogue ({events.length})
+                    </Link>
+                  </Button>
+                </div>
+              )}
             </>
           )}
         </div>
