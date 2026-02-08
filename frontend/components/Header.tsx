@@ -28,6 +28,9 @@ export function Header() {
     if (path === '/mes-reservations') {
       return pathname === '/mes-reservations';
     }
+    if (path === '/dashboard') {
+      return pathname === '/dashboard';
+    }
     return false;
   };
 
@@ -38,7 +41,7 @@ export function Header() {
           <Link href="/" className="text-2xl font-bold text-gray-900 dark:text-white">
             Evenza
           </Link>
-          
+
           {/* Desktop Navigation */}
           <nav className="hidden sm:flex items-center gap-4">
             {isAuthenticated && user ? (
@@ -54,39 +57,47 @@ export function Header() {
                 </div>
                 {user.role === 'ADMIN' ? (
                   <>
-                    <Button 
-                      variant={isActive('/admin/events') ? 'default' : 'ghost'} 
-                      className={isActive('/admin/events') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}
-                      asChild
-                    >
-                      <Link href="/admin/events">Événements</Link>
-                    </Button>
-                    <Button 
-                      variant={isActive('/admin/reservations') ? 'default' : 'ghost'} 
-                      className={isActive('/admin/reservations') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}
-                      asChild
-                    >
-                      <Link href="/admin/reservations">Réservations</Link>
-                    </Button>
-                    <Button 
-                      variant={isActive('/admin/dashboard') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/admin/dashboard') ? 'default' : 'ghost'}
                       className={isActive('/admin/dashboard') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}
                       asChild
                     >
                       <Link href="/admin/dashboard">Dashboard</Link>
                     </Button>
+                    <Button
+                      variant={isActive('/admin/events') ? 'default' : 'ghost'}
+                      className={isActive('/admin/events') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}
+                      asChild
+                    >
+                      <Link href="/admin/events">Événements</Link>
+                    </Button>
+                    <Button
+                      variant={isActive('/admin/reservations') ? 'default' : 'ghost'}
+                      className={isActive('/admin/reservations') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}
+                      asChild
+                    >
+                      <Link href="/admin/reservations">Réservations</Link>
+                    </Button>
+
                   </>
                 ) : (
                   <>
-                    <Button 
-                      variant={isActive('/catalogue') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/dashboard') ? 'default' : 'ghost'}
+                      className={isActive('/dashboard') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}
+                      asChild
+                    >
+                      <Link href="/dashboard">Dashboard</Link>
+                    </Button>
+                    <Button
+                      variant={isActive('/catalogue') ? 'default' : 'ghost'}
                       className={isActive('/catalogue') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}
                       asChild
                     >
                       <Link href="/catalogue">Catalogue</Link>
                     </Button>
-                    <Button 
-                      variant={isActive('/mes-reservations') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/mes-reservations') ? 'default' : 'ghost'}
                       className={isActive('/mes-reservations') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}
                       asChild
                     >
@@ -148,24 +159,24 @@ export function Header() {
                 </div>
                 {user.role === 'ADMIN' ? (
                   <>
-                    <Button 
-                      variant={isActive('/admin/events') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/admin/events') ? 'default' : 'ghost'}
                       className={`w-full justify-start ${isActive('/admin/events') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}`}
                       asChild
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Link href="/admin/events">Événements</Link>
                     </Button>
-                    <Button 
-                      variant={isActive('/admin/reservations') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/admin/reservations') ? 'default' : 'ghost'}
                       className={`w-full justify-start ${isActive('/admin/reservations') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}`}
                       asChild
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Link href="/admin/reservations">Réservations</Link>
                     </Button>
-                    <Button 
-                      variant={isActive('/admin/dashboard') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/admin/dashboard') ? 'default' : 'ghost'}
                       className={`w-full justify-start ${isActive('/admin/dashboard') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}`}
                       asChild
                       onClick={() => setMobileMenuOpen(false)}
@@ -175,16 +186,24 @@ export function Header() {
                   </>
                 ) : (
                   <>
-                    <Button 
-                      variant={isActive('/catalogue') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/dashboard') ? 'default' : 'ghost'}
+                      className={`w-full justify-start ${isActive('/dashboard') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}`}
+                      asChild
+                      onClick={() => setMobileMenuOpen(false)}
+                    >
+                      <Link href="/dashboard">Dashboard</Link>
+                    </Button>
+                    <Button
+                      variant={isActive('/catalogue') ? 'default' : 'ghost'}
                       className={`w-full justify-start ${isActive('/catalogue') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}`}
                       asChild
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <Link href="/catalogue">Catalogue</Link>
                     </Button>
-                    <Button 
-                      variant={isActive('/mes-reservations') ? 'default' : 'ghost'} 
+                    <Button
+                      variant={isActive('/mes-reservations') ? 'default' : 'ghost'}
                       className={`w-full justify-start ${isActive('/mes-reservations') ? 'bg-gray-900 text-white dark:bg-white dark:text-gray-900' : ''}`}
                       asChild
                       onClick={() => setMobileMenuOpen(false)}
@@ -193,12 +212,12 @@ export function Header() {
                     </Button>
                   </>
                 )}
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   onClick={() => {
                     logout();
                     setMobileMenuOpen(false);
-                  }} 
+                  }}
                   className="w-full justify-start mt-2 border-t border-gray-200 dark:border-gray-800 pt-3"
                 >
                   <LogOut className="h-4 w-4 mr-2" />

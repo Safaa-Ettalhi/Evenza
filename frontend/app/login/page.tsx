@@ -28,7 +28,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading, user } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -41,11 +41,16 @@ export default function LoginPage() {
   });
 
   React.useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      router.push('/');
+    if (!authLoading && isAuthenticated && user) {
+      if (user.role === 'ADMIN') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/dashboard');
+      }
       router.refresh();
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, authLoading, router, user, login]);
+
   if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -62,9 +67,15 @@ export default function LoginPage() {
     try {
       setIsLoading(true);
       setError(null);
-      await login(data.email, data.password);
+      const loggedInUser = await login(data.email, data.password);
+
+      // Small delay to ensure cookie/state propagation if needed
       setTimeout(() => {
-        router.push('/');
+        if (loggedInUser.role === 'ADMIN') {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/dashboard');
+        }
         router.refresh();
       }, 100);
     } catch (err) {
